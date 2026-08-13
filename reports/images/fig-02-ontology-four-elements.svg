@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 640" width="1120" height="640" role="img" aria-labelledby="t2 d2">
+  <title id="t2">Ontology four elements</title>
+  <desc id="d2">Operational ontology: Data, Logic, Action, Security around one decision object.</desc>
+  <defs>
+    <filter id="s2" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="640" fill="#F6F7FB"/>
+  <text x="40" y="40" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">操作型本体的四要素</text>
+  <text x="40" y="66" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">Palantir 公开定位：Ontology 不是知识图谱软件，而是围绕决策组织 Data / Logic / Action / Security 的操作层</text>
+  <line x1="560" y1="200" x2="560" y2="430" stroke="#C7D2FE" stroke-width="3"/>
+  <line x1="250" y1="330" x2="870" y2="330" stroke="#C7D2FE" stroke-width="3"/>
+  <g filter="url(#s2)"><circle cx="560" cy="330" r="78" fill="#4F46E5"/></g>
+  <text x="560" y="322" text-anchor="middle" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#FFFFFF">Ontology</text>
+  <text x="560" y="344" text-anchor="middle" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#C7D2FE">决策对象中枢</text>
+  <g filter="url(#s2)"><rect x="70" y="110" width="360" height="170" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="70" y="110" width="360" height="8" rx="4" fill="#0F766E"/>
+  <text x="94" y="150" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#0F766E">Data  数据</text>
+  <text x="94" y="178" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">对象、属性、链接表达组织现实</text>
+  <text x="94" y="200" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">映射 backing datasource，带稳定 ID</text>
+  <text x="94" y="222" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">回答：发生了什么、对象之间如何关联</text>
+  <text x="94" y="252" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">员工看到「订单 / 设备 / 工单」，而不是表名</text>
+  <g filter="url(#s2)"><rect x="690" y="110" width="360" height="170" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="690" y="110" width="360" height="8" rx="4" fill="#4F46E5"/>
+  <text x="714" y="150" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#4F46E5">Logic  逻辑</text>
+  <text x="714" y="178" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">规则、模型、Function、情景模拟</text>
+  <text x="714" y="200" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">服务端隔离执行，可遍历链接、聚合</text>
+  <text x="714" y="222" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">回答：可以怎样计算、建议是什么</text>
+  <text x="714" y="252" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">分析结论要沉淀成可复用函数，而不是一次性报表</text>
+  <g filter="url(#s2)"><rect x="70" y="410" width="360" height="170" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="70" y="410" width="360" height="8" rx="4" fill="#D97706"/>
+  <text x="94" y="450" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#D97706">Action  行动</text>
+  <text x="94" y="478" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">改变对象属性/链接的单一事务</text>
+  <text x="94" y="500" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">参数、校验、审批、通知、外部写回</text>
+  <text x="94" y="522" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">回答：被授权时可以提议或执行什么</text>
+  <text x="94" y="552" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">检索到对象不等于可以改对象；读写必须分契约</text>
+  <g filter="url(#s2)"><rect x="690" y="410" width="360" height="170" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="690" y="410" width="360" height="8" rx="4" fill="#BE123C"/>
+  <text x="714" y="450" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="18" font-weight="700" fill="#BE123C">Security  安全</text>
+  <text x="714" y="478" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">打开应用、看见数据、调用函数、执行写回</text>
+  <text x="714" y="500" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">是四种不同权限，必须独立可审</text>
+  <text x="714" y="522" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#334155">回答：谁能看到、调用或批准</text>
+  <text x="714" y="552" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">动态安全随用户、对象、操作和情境求值</text>
+</svg>

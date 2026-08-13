@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 740" width="1120" height="740" role="img">
+  <defs>
+    <filter id="s1" x="-4%" y="-6%" width="108%" height="118%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4F46E5"/><stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="1120" height="740" fill="#F6F7FB"/>
+  <text x="40" y="42" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Palantir 本体论产品组合</text>
+  <text x="40" y="68" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">员工面对的是岗位任务应用；Ontology 是把数据、逻辑、行动与安全收束到同一业务对象模型的操作层</text>
+  <g filter="url(#s1)">
+    <rect x="40" y="92" width="1040" height="92" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="40" y="92" width="10" height="92" rx="4" fill="#7C3AED"/>
+  <text x="70" y="122" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="700" fill="#7C3AED">交付与产品化层</text>
+  <text x="70" y="146" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#1E293B">Apollo / Marketplace</text>
+  <text x="70" y="168" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">版本化发布、升级通道、维护窗口；把已验证的本体、逻辑和应用打包成可安装领域产品</text>
+  <rect x="780" y="118" width="130" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE"/>
+  <text x="845" y="143" text-anchor="middle" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#6D28D9">软件交付</text>
+  <rect x="926" y="118" width="130" height="40" rx="8" fill="#F5F3FF" stroke="#DDD6FE"/>
+  <text x="991" y="143" text-anchor="middle" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#6D28D9">产品目录</text>
+  <g filter="url(#s1)">
+    <rect x="40" y="200" width="1040" height="100" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="40" y="200" width="10" height="100" rx="4" fill="#4F46E5"/>
+  <text x="70" y="230" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="700" fill="#4F46E5">AI 与自动化层 / AIP</text>
+  <text x="70" y="254" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#1E293B">AIP Logic / Chatbot Studio / Evals / Automate</text>
+  <text x="70" y="276" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">在绑定对象、工具、权限和评测边界内生成提案、处理例外；不把通用模型直接连到数据库</text>
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="11" fill="#4338CA">
+    <rect x="70" y="286" width="70" height="24" rx="6" fill="#EEF2FF"/><text x="105" y="302" text-anchor="middle">Logic</text>
+    <rect x="148" y="286" width="90" height="24" rx="6" fill="#EEF2FF"/><text x="193" y="302" text-anchor="middle">Chatbot</text>
+    <rect x="246" y="286" width="70" height="24" rx="6" fill="#EEF2FF"/><text x="281" y="302" text-anchor="middle">Evals</text>
+    <rect x="324" y="286" width="90" height="24" rx="6" fill="#EEF2FF"/><text x="369" y="302" text-anchor="middle">Automate</text>
+  </g>
+  <g filter="url(#s1)">
+    <rect x="40" y="316" width="1040" height="100" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="40" y="316" width="10" height="100" rx="4" fill="#0F766E"/>
+  <text x="70" y="346" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="700" fill="#0F766E">应用与开发接口层</text>
+  <text x="70" y="370" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#1E293B">Workshop / Slate / Object Views / OSDK / Ontology MCP / Palantir MCP</text>
+  <text x="70" y="394" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">一线看到任务收件箱、对象详情、地图与审批队列；开发者用类型化 SDK 与 MCP 接入同一对象语言</text>
+  <g filter="url(#s1)">
+    <rect x="40" y="432" width="1040" height="148" rx="14" fill="#FFFFFF" stroke="#C7D2FE"/>
+  </g>
+  <rect x="40" y="432" width="10" height="148" rx="4" fill="url(#g1)"/>
+  <text x="70" y="462" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="700" fill="#4F46E5">决策本体层 / Ontology（核心）</text>
+  <text x="70" y="486" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#1E293B">操作型本体：语义元素 + 动力学元素</text>
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <rect x="70" y="504" width="176" height="54" rx="10" fill="#EEF2FF"/>
+    <text x="158" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Object / Property</text>
+    <text x="158" y="544" text-anchor="middle" font-size="11" fill="#6366F1">业务对象与属性</text>
+    <rect x="258" y="504" width="176" height="54" rx="10" fill="#EEF2FF"/>
+    <text x="346" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Link</text>
+    <text x="346" y="544" text-anchor="middle" font-size="11" fill="#6366F1">可双向遍历的关系</text>
+    <rect x="446" y="504" width="176" height="54" rx="10" fill="#FEF3C7"/>
+    <text x="534" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">Action</text>
+    <text x="534" y="544" text-anchor="middle" font-size="11" fill="#B45309">受控写回与事务</text>
+    <rect x="634" y="504" width="176" height="54" rx="10" fill="#ECFDF5"/>
+    <text x="722" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">Function</text>
+    <text x="722" y="544" text-anchor="middle" font-size="11" fill="#0F766E">隔离执行的业务逻辑</text>
+    <rect x="822" y="504" width="218" height="54" rx="10" fill="#FEE2E2"/>
+    <text x="931" y="526" text-anchor="middle" font-size="13" font-weight="700" fill="#9F1239">Dynamic Security</text>
+    <text x="931" y="544" text-anchor="middle" font-size="11" fill="#BE123C">随对象/动作/情境生效</text>
+  </g>
+  <g filter="url(#s1)">
+    <rect x="40" y="596" width="1040" height="92" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="40" y="596" width="10" height="92" rx="4" fill="#334155"/>
+  <text x="70" y="626" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" font-weight="700" fill="#334155">数据运营层 / Foundry</text>
+  <text x="70" y="650" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="16" font-weight="700" fill="#1E293B">连接 / 管道 / 数据质量 / 谱系 / 数据目录 / 权限</text>
+  <text x="70" y="672" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="12" fill="#64748B">ERP / CRM / MES / IoT / 文档接入后成为 Ontology 的 backing datasource，而不是孤立概念分类</text>
+</svg>

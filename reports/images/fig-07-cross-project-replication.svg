@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 760" width="1120" height="760" role="img">
+  <defs>
+    <marker id="arr7" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#4F46E5"/>
+    </marker>
+    <filter id="s7" x="-4%" y="-8%" width="108%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="760" fill="#F6F7FB"/>
+  <text x="40" y="38" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">跨项目可迁移：复制设计原则，而不是复制平台内核</text>
+  <text x="40" y="64" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">可迁移的是对象图、命令模型、策略分离、类型化接口与产品化打包；不可迁移的是 Foundry 私有存储、动态安全求值与内部事务实现。</text>
+
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <g filter="url(#s7)"><rect x="40" y="92" width="250" height="220" rx="16" fill="#4F46E5"/></g>
+    <text x="165" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#FFFFFF">内核 Kernel</text>
+    <text x="165" y="158" text-anchor="middle" font-size="12" fill="#C7D2FE">跨项目稳定抽象</text>
+    <text x="165" y="190" text-anchor="middle" font-size="12" fill="#EEF2FF">对象类型 + 主键</text>
+    <text x="165" y="210" text-anchor="middle" font-size="12" fill="#EEF2FF">关系导航语义</text>
+    <text x="165" y="230" text-anchor="middle" font-size="12" fill="#EEF2FF">Action Proposal Schema</text>
+    <text x="165" y="250" text-anchor="middle" font-size="12" fill="#EEF2FF">四权策略模型</text>
+    <text x="165" y="270" text-anchor="middle" font-size="12" fill="#EEF2FF">Context Pack 契约</text>
+    <text x="165" y="290" text-anchor="middle" font-size="12" fill="#C7D2FE">不绑定具体图库</text>
+
+    <g filter="url(#s7)"><rect x="330" y="92" width="250" height="220" rx="16" fill="#FFFFFF" stroke="#C7D2FE"/></g>
+    <text x="455" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#3730A3">领域包 Domain Pack</text>
+    <text x="455" y="158" text-anchor="middle" font-size="12" fill="#64748B">可安装、可版本化</text>
+    <text x="455" y="190" text-anchor="middle" font-size="12" fill="#334155">维修 / 缺料 / 订单例外</text>
+    <text x="455" y="210" text-anchor="middle" font-size="12" fill="#334155">对象卡片 + 工具卡片</text>
+    <text x="455" y="230" text-anchor="middle" font-size="12" fill="#334155">Action / 审批 / 指标卡片</text>
+    <text x="455" y="250" text-anchor="middle" font-size="12" fill="#334155">权限模板 + 评测集</text>
+    <text x="455" y="270" text-anchor="middle" font-size="12" fill="#334155">演示数据 + 运维说明</text>
+    <text x="455" y="290" text-anchor="middle" font-size="12" fill="#6366F1">对标 Marketplace 产品形态</text>
+
+    <g filter="url(#s7)"><rect x="620" y="92" width="250" height="220" rx="16" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="745" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#065F46">项目实例 Instance</text>
+    <text x="745" y="158" text-anchor="middle" font-size="12" fill="#64748B">租户特有绑定</text>
+    <text x="745" y="190" text-anchor="middle" font-size="12" fill="#334155">来源系统映射</text>
+    <text x="745" y="210" text-anchor="middle" font-size="12" fill="#334155">组织身份与职责</text>
+    <text x="745" y="230" text-anchor="middle" font-size="12" fill="#334155">敏感分级与用途</text>
+    <text x="745" y="250" text-anchor="middle" font-size="12" fill="#334155">写回系统连接器</text>
+    <text x="745" y="270" text-anchor="middle" font-size="12" fill="#334155">本地评测阈值</text>
+    <text x="745" y="290" text-anchor="middle" font-size="12" fill="#0F766E">不把实例配置写回内核</text>
+
+    <g filter="url(#s7)"><rect x="910" y="92" width="170" height="220" rx="16" fill="#FFFFFF" stroke="#FDE68A"/></g>
+    <text x="995" y="128" text-anchor="middle" font-size="14" font-weight="700" fill="#92400E">运行时适配</text>
+    <text x="995" y="158" text-anchor="middle" font-size="12" fill="#64748B">可替换后端</text>
+    <text x="995" y="190" text-anchor="middle" font-size="12" fill="#334155">RDF / SPARQL</text>
+    <text x="995" y="210" text-anchor="middle" font-size="12" fill="#334155">属性图 / Cypher</text>
+    <text x="995" y="230" text-anchor="middle" font-size="12" fill="#334155">OSDK / OpenAPI</text>
+    <text x="995" y="250" text-anchor="middle" font-size="12" fill="#334155">OMCP 只读面</text>
+    <text x="995" y="270" text-anchor="middle" font-size="12" fill="#334155">Builder MCP 隔离</text>
+    <text x="995" y="290" text-anchor="middle" font-size="12" fill="#B45309">接口稳，存储可换</text>
+
+    <path d="M290,202 H322" stroke="#4F46E5" stroke-width="3" marker-end="url(#arr7)"/>
+    <path d="M580,202 H612" stroke="#4F46E5" stroke-width="3" marker-end="url(#arr7)"/>
+    <path d="M870,202 H902" stroke="#4F46E5" stroke-width="3" marker-end="url(#arr7)"/>
+
+    <g filter="url(#s7)"><rect x="40" y="340" width="1040" height="150" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="372" font-size="15" font-weight="700" fill="#1E293B">Palantir 侧可借鉴的复制机制（公开产品形态）</text>
+    <rect x="60" y="392" width="230" height="76" rx="10" fill="#EEF2FF"/>
+    <text x="175" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Marketplace</text>
+    <text x="175" y="442" text-anchor="middle" font-size="11" fill="#4F46E5">发现 / 安装 / 升级 / 维护窗口</text>
+    <rect x="306" y="392" width="230" height="76" rx="10" fill="#F5F3FF"/>
+    <text x="421" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#5B21B6">Apollo</text>
+    <text x="421" y="442" text-anchor="middle" font-size="11" fill="#7C3AED">软件交付与运行控制</text>
+    <rect x="552" y="392" width="230" height="76" rx="10" fill="#ECFDF5"/>
+    <text x="667" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">OSDK</text>
+    <text x="667" y="442" text-anchor="middle" font-size="11" fill="#0F766E">TS / Python / Java / OpenAPI 类型化客户端</text>
+    <rect x="798" y="392" width="250" height="76" rx="10" fill="#FFFBEB"/>
+    <text x="923" y="420" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">OMCP vs Palantir MCP</text>
+    <text x="923" y="442" text-anchor="middle" font-size="11" fill="#B45309">消费面与建设面分离，建设面不能写数据</text>
+
+    <g filter="url(#s7)"><rect x="40" y="510" width="1040" height="214" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="542" font-size="15" font-weight="700" fill="#1E293B">企业侧三阶段复制节奏</text>
+    <rect x="60" y="562" width="310" height="140" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+    <text x="76" y="590" font-size="13" font-weight="700" fill="#334155">阶段 1  一个决策闭环</text>
+    <text x="76" y="616" font-size="12" fill="#475569">只读对象视图 + 人工提交 Action</text>
+    <text x="76" y="636" font-size="12" fill="#475569">LLM 只做带证据的分类/摘要/提案</text>
+    <text x="76" y="656" font-size="12" fill="#475569">成功标准：周期、例外、返工、合规</text>
+    <text x="76" y="680" font-size="11" fill="#94A3B8">禁止以接入数据源数量验收</text>
+    <rect x="390" y="562" width="310" height="140" rx="12" fill="#EEF2FF" stroke="#C7D2FE"/>
+    <text x="406" y="590" font-size="13" font-weight="700" fill="#3730A3">阶段 2  固化为可操作产品</text>
+    <text x="406" y="616" font-size="12" fill="#475569">对象/规则/Action/界面版本化</text>
+    <text x="406" y="636" font-size="12" fill="#475569">例外处理转成状态与责任人</text>
+    <text x="406" y="656" font-size="12" fill="#475569">历史案例形成评测集</text>
+    <text x="406" y="680" font-size="11" fill="#6366F1">产出五类卡片资产</text>
+    <rect x="720" y="562" width="330" height="140" rx="12" fill="#ECFDF5" stroke="#A7F3D0"/>
+    <text x="736" y="590" font-size="13" font-weight="700" fill="#065F46">阶段 3  打包安装到下一项目</text>
+    <text x="736" y="616" font-size="12" fill="#475569">领域包 + 权限模板 + 评测门禁</text>
+    <text x="736" y="636" font-size="12" fill="#475569">Agent 仍先只读，再审批写</text>
+    <text x="736" y="656" font-size="12" fill="#475569">失败回退、人工接管、可撤销</text>
+    <text x="736" y="680" font-size="11" fill="#0F766E">复制的是产品，不是一次性项目代码</text>
+  </g>
+</svg>

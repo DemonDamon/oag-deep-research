@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 820" width="1120" height="820" role="img">
+  <defs>
+    <filter id="s6" x="-4%" y="-8%" width="108%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="820" fill="#F6F7FB"/>
+  <text x="40" y="38" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">技术难点与对应技术方案</text>
+  <text x="40" y="64" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">难点来自「本体」一词在四种工程语境中不可互换；方案必须分层，而不是选一个图数据库了事。</text>
+
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <rect x="40" y="84" width="500" height="36" rx="8" fill="#FEE2E2"/>
+    <text x="290" y="107" text-anchor="middle" font-size="13" font-weight="700" fill="#9F1239">难点</text>
+    <rect x="580" y="84" width="500" height="36" rx="8" fill="#D1FAE5"/>
+    <text x="830" y="107" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">技术方案</text>
+
+    <g filter="url(#s6)"><rect x="40" y="132" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="160" font-size="14" font-weight="700" fill="#1E293B">1  范式混淆</text>
+    <text x="60" y="182" font-size="12" fill="#475569">RDF/OWL、SHACL、属性图、操作型本体、</text>
+    <text x="60" y="200" font-size="12" fill="#475569">Agent 运行时约束不能互相替代</text>
+    <g filter="url(#s6)"><rect x="580" y="132" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="160" font-size="14" font-weight="700" fill="#065F46">分层建模，禁止一词多用</text>
+    <text x="600" y="182" font-size="12" fill="#475569">OWL 管概念蕴含；SHACL 管交付门禁；</text>
+    <text x="600" y="200" font-size="12" fill="#475569">属性图管遍历；操作层管 Action 与权限</text>
+
+    <g filter="url(#s6)"><rect x="40" y="236" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="264" font-size="14" font-weight="700" fill="#1E293B">2  对象身份与权威映射</text>
+    <text x="60" y="286" font-size="12" fill="#475569">跨系统主键、口径冲突、时间性、</text>
+    <text x="60" y="304" font-size="12" fill="#475569">backing datasource 与对象生命周期</text>
+    <g filter="url(#s6)"><rect x="580" y="236" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="264" font-size="14" font-weight="700" fill="#065F46">对象契约：ID / 来源 / 所有者 / 刷新</text>
+    <text x="600" y="286" font-size="12" fill="#475569">每个对象声明权威来源、质量门槛、谱系；</text>
+    <text x="600" y="304" font-size="12" fill="#475569">冲突显式挂起，而不是静默覆盖</text>
+
+    <g filter="url(#s6)"><rect x="40" y="340" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="368" font-size="14" font-weight="700" fill="#1E293B">3  受控写回与事务语义</text>
+    <text x="60" y="390" font-size="12" fill="#475569">LLM 生成 Cypher/SPARQL Update 不等于</text>
+    <text x="60" y="408" font-size="12" fill="#475569">安全 Action；幂等、隔离、外部编排难公开复现</text>
+    <g filter="url(#s6)"><rect x="580" y="340" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="368" font-size="14" font-weight="700" fill="#065F46">Action Proposal 协议</text>
+    <text x="600" y="390" font-size="12" fill="#475569">目标对象、字段变更、证据、策略检查、</text>
+    <text x="600" y="408" font-size="12" fill="#475569">审批人、幂等键、回滚路径缺一不可</text>
+
+    <g filter="url(#s6)"><rect x="40" y="444" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="472" font-size="14" font-weight="700" fill="#1E293B">4  动态安全与权限分离</text>
+    <text x="60" y="494" font-size="12" fill="#475569">应用可见、数据可读、函数可调、</text>
+    <text x="60" y="512" font-size="12" fill="#475569">Action 可执行是四种权限</text>
+    <g filter="url(#s6)"><rect x="580" y="444" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="472" font-size="14" font-weight="700" fill="#065F46">四权矩阵 + 工具白名单</text>
+    <text x="600" y="494" font-size="12" fill="#475569">策略随用户/对象/操作/情境求值；</text>
+    <text x="600" y="512" font-size="12" fill="#475569">MCP 只提供能力描述，不替代授权审计</text>
+
+    <g filter="url(#s6)"><rect x="40" y="548" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="576" font-size="14" font-weight="700" fill="#1E293B">5  OAG 检索与上下文工程</text>
+    <text x="60" y="598" font-size="12" fill="#475569">chunk 丢失关系；GraphRAG 抽图不等于本体；</text>
+    <text x="60" y="616" font-size="12" fill="#475569">Text2Cypher 执行成功仍可能语义错误</text>
+    <g filter="url(#s6)"><rect x="580" y="548" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="576" font-size="14" font-weight="700" fill="#065F46">Context Pack + 混合检索渐进加码</text>
+    <text x="600" y="598" font-size="12" fill="#475569">先确认上下文进了 prompt；再叠加 HyDE /</text>
+    <text x="600" y="616" font-size="12" fill="#475569">关键词 / RRF；记录改写链与淘汰原因</text>
+
+    <g filter="url(#s6)"><rect x="40" y="652" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <text x="60" y="680" font-size="14" font-weight="700" fill="#1E293B">6  规则生命周期与冲突</text>
+    <text x="60" y="702" font-size="12" fill="#475569">SHACL / SWRL / DMN / Datalog 语义不同；</text>
+    <text x="60" y="720" font-size="12" fill="#475569">自然语言制度不能直接交给 LLM 执行</text>
+    <g filter="url(#s6)"><rect x="580" y="652" width="500" height="92" rx="12" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <text x="600" y="680" font-size="14" font-weight="700" fill="#065F46">规则即版本化知识资产</text>
+    <text x="600" y="702" font-size="12" fill="#475569">来源、适用范围、命中策略、测试用例、</text>
+    <text x="600" y="720" font-size="12" fill="#475569">provenance 分账；验证器不自动修外部系统</text>
+
+    <g filter="url(#s6)"><rect x="40" y="756" width="1040" height="40" rx="10" fill="#EEF2FF"/></g>
+    <text x="560" y="781" text-anchor="middle" font-size="13" font-weight="600" fill="#3730A3">第 7 点贯穿全程：Harness 把本体/规则/Context Pack 注入不同控制点（理解、规划、工具前、输出），而不是一股脑塞进 system prompt</text>
+  </g>
+</svg>

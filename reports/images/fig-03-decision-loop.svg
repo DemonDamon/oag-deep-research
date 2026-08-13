@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 520" width="1120" height="520" role="img" aria-labelledby="t3 d3">
+  <title id="t3">Device anomaly decision loop</title>
+  <desc id="d3">From multi-source data, object modeling, rule suggestion, job-role operation, controlled Action writeback, to result feedback.</desc>
+  <defs>
+    <marker id="arr3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#64748B"/>
+    </marker>
+    <filter id="s3" x="-6%" y="-10%" width="112%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="520" fill="#F6F7FB"/>
+  <text x="40" y="38" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">产品形态示例：设备异常处置闭环</text>
+  <text x="40" y="64" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">与静态 BI 的差别：不止告诉「发生了什么」，还在对象与权限边界中支持「谁做什么、结果如何被记录」</text>
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <g filter="url(#s3)"><rect x="36" y="96" width="160" height="150" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <circle cx="64" cy="124" r="12" fill="#334155"/><text x="64" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">1</text>
+    <text x="84" y="130" font-size="13" font-weight="700" fill="#1E293B">数据汇集</text>
+    <text x="52" y="164" font-size="12" fill="#475569">遥测 / 工单</text>
+    <text x="52" y="184" font-size="12" fill="#475569">备件 / 人员资质</text>
+    <text x="52" y="204" font-size="12" fill="#475569">生产计划</text>
+    <text x="52" y="228" font-size="11" fill="#94A3B8">Foundry 管道</text>
+    <g filter="url(#s3)"><rect x="236" y="96" width="160" height="150" rx="14" fill="#FFFFFF" stroke="#C7D2FE"/></g>
+    <circle cx="264" cy="124" r="12" fill="#4F46E5"/><text x="264" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">2</text>
+    <text x="284" y="130" font-size="13" font-weight="700" fill="#1E293B">对象建模</text>
+    <text x="252" y="164" font-size="12" fill="#475569">设备 / 异常事件</text>
+    <text x="252" y="184" font-size="12" fill="#475569">工单 / 零件</text>
+    <text x="252" y="204" font-size="12" fill="#475569">班组 / 责任人</text>
+    <text x="252" y="228" font-size="11" fill="#94A3B8">Ontology 对象图</text>
+    <g filter="url(#s3)"><rect x="436" y="96" width="160" height="150" rx="14" fill="#FFFFFF" stroke="#DDD6FE"/></g>
+    <circle cx="464" cy="124" r="12" fill="#7C3AED"/><text x="464" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">3</text>
+    <text x="484" y="130" font-size="13" font-weight="700" fill="#1E293B">规则建议</text>
+    <text x="452" y="164" font-size="12" fill="#475569">风险识别</text>
+    <text x="452" y="184" font-size="12" fill="#475569">处置推荐</text>
+    <text x="452" y="204" font-size="12" fill="#475569">情景比较</text>
+    <text x="452" y="228" font-size="11" fill="#94A3B8">Function / 模型</text>
+    <g filter="url(#s3)"><rect x="636" y="96" width="160" height="150" rx="14" fill="#FFFFFF" stroke="#A7F3D0"/></g>
+    <circle cx="664" cy="124" r="12" fill="#0F766E"/><text x="664" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">4</text>
+    <text x="684" y="130" font-size="13" font-weight="700" fill="#1E293B">岗位操作</text>
+    <text x="652" y="164" font-size="12" fill="#475569">查看证据</text>
+    <text x="652" y="184" font-size="12" fill="#475569">修订建议</text>
+    <text x="652" y="204" font-size="12" fill="#475569">发起工单/备件</text>
+    <text x="652" y="228" font-size="11" fill="#94A3B8">Workshop 任务页</text>
+    <g filter="url(#s3)"><rect x="836" y="96" width="248" height="150" rx="14" fill="#FFFFFF" stroke="#FDE68A"/></g>
+    <circle cx="864" cy="124" r="12" fill="#D97706"/><text x="864" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">5</text>
+    <text x="884" y="130" font-size="13" font-weight="700" fill="#1E293B">受控写回</text>
+    <text x="852" y="164" font-size="12" fill="#475569">Action 校验 / 审批 / 幂等</text>
+    <text x="852" y="184" font-size="12" fill="#475569">写回维护系统 / ERP</text>
+    <text x="852" y="204" font-size="12" fill="#475569">审计留痕 / 可撤销</text>
+    <text x="852" y="228" font-size="11" fill="#94A3B8">Agent 默认只生成提案</text>
+  </g>
+  <path d="M196,171 H228" stroke="#64748B" stroke-width="2" marker-end="url(#arr3)"/>
+  <path d="M396,171 H428" stroke="#64748B" stroke-width="2" marker-end="url(#arr3)"/>
+  <path d="M596,171 H628" stroke="#64748B" stroke-width="2" marker-end="url(#arr3)"/>
+  <path d="M796,171 H828" stroke="#64748B" stroke-width="2" marker-end="url(#arr3)"/>
+  <path d="M960,246 C960,330 200,330 116,246" fill="none" stroke="#4F46E5" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arr3)"/>
+  <rect x="360" y="300" width="400" height="44" rx="10" fill="#EEF2FF"/>
+  <text x="560" y="327" text-anchor="middle" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" font-weight="600" fill="#3730A3">结果回流：耗时 / 复发 / 处置质量 到 对象历史 到 下一轮评测</text>
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <rect x="36" y="370" width="1048" height="118" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+    <text x="56" y="402" font-size="14" font-weight="700" fill="#1E293B">员工侧「长相」：不是本体建模器</text>
+    <text x="56" y="428" font-size="13" fill="#475569">一线：任务队列 / 告警 / 对象详情　　主管：优先级与例外　　分析师：对象关系与指标</text>
+    <text x="56" y="452" font-size="13" fill="#475569">建设者：对象定义与数据契约　　开发者：低代码或 OSDK　　安全：四种权限分离　　AI 建设者：受权上下文 + 提案式工作流</text>
+    <text x="56" y="476" font-size="12" fill="#64748B">绝大多数员工不应直接编辑 Schema；成熟形态是按职责在最靠近工作的界面里使用同一组受治理对象。</text>
+  </g>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 780" width="1120" height="780" role="img">
+  <defs>
+    <filter id="s4" x="-4%" y="-8%" width="108%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1120" height="780" fill="#F6F7FB"/>
+  <text x="40" y="40" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#0F172A">开源平替不是单仓库替换，而是能力组合</text>
+  <text x="40" y="66" font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif" font-size="13" fill="#64748B">调研结论（2026-08-13 静态审阅）：不存在可直接替代 Palantir Ontology / OAG 的开源仓库。Action、对象级权限、审批、写回与审计仍须自建。</text>
+
+  <g font-family="PingFang SC, Noto Sans SC, Microsoft YaHei, sans-serif">
+    <g filter="url(#s4)"><rect x="40" y="92" width="1040" height="108" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <rect x="40" y="92" width="8" height="108" rx="4" fill="#BE123C"/>
+    <text x="68" y="122" font-size="13" font-weight="700" fill="#BE123C">L5  仍须自建的企业适配层（开源普遍缺口）</text>
+    <text x="68" y="148" font-size="14" font-weight="600" fill="#1E293B">业务 Action / 对象级权限 / 变更审批 / 跨系统写回 / 运行时审计 / 幂等与回滚</text>
+    <text x="68" y="174" font-size="12" fill="#64748B">任何自称 Open Source Palantir 的项目，若只提供图谱或检索，只能覆盖四要素中的一部分</text>
+
+    <g filter="url(#s4)"><rect x="40" y="216" width="1040" height="118" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <rect x="40" y="216" width="8" height="118" rx="4" fill="#7C3AED"/>
+    <text x="68" y="246" font-size="13" font-weight="700" fill="#7C3AED">L4  Agent / MCP 聚合平台（对照，非等价物）</text>
+    <rect x="68" y="262" width="230" height="50" rx="10" fill="#F5F3FF"/><text x="183" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#5B21B6">Semantica</text><text x="183" y="302" text-anchor="middle" font-size="11" fill="#7C3AED">MIT / 上下文-本体-溯源</text>
+    <rect x="310" y="262" width="300" height="50" rx="10" fill="#F5F3FF"/><text x="460" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#5B21B6">AWS Context Ontology Accelerator</text><text x="460" y="302" text-anchor="middle" font-size="11" fill="#7C3AED">Apache-2.0 / VKG + MCP / 绑 AWS</text>
+    <rect x="622" y="262" width="230" height="50" rx="10" fill="#FEF3C7"/><text x="737" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#92400E">OntoBricks</text><text x="737" y="302" text-anchor="middle" font-size="11" fill="#B45309">Databricks License / 不可通用再分发</text>
+    <rect x="864" y="262" width="190" height="50" rx="10" fill="#F5F3FF"/><text x="959" y="284" text-anchor="middle" font-size="13" font-weight="700" fill="#5B21B6">LangGraph / Agents SDK</text><text x="959" y="302" text-anchor="middle" font-size="11" fill="#7C3AED">Harness，不等于权限治理</text>
+
+    <g filter="url(#s4)"><rect x="40" y="350" width="1040" height="118" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <rect x="40" y="350" width="8" height="118" rx="4" fill="#4F46E5"/>
+    <text x="68" y="380" font-size="13" font-weight="700" fill="#4F46E5">L3  上下文图 / 检索（OAG 实验基线）</text>
+    <rect x="68" y="396" width="200" height="50" rx="10" fill="#EEF2FF"/><text x="168" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Graphiti</text><text x="168" y="436" text-anchor="middle" font-size="11" fill="#4F46E5">时态上下文图 + MCP</text>
+    <rect x="280" y="396" width="200" height="50" rx="10" fill="#EEF2FF"/><text x="380" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Microsoft GraphRAG</text><text x="380" y="436" text-anchor="middle" font-size="11" fill="#4F46E5">文档抽图 / 社区摘要</text>
+    <rect x="492" y="396" width="200" height="50" rx="10" fill="#EEF2FF"/><text x="592" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">OG-RAG</text><text x="592" y="436" text-anchor="middle" font-size="11" fill="#4F46E5">本体约束超图 RAG</text>
+    <rect x="704" y="396" width="160" height="50" rx="10" fill="#EEF2FF"/><text x="784" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">HyDE</text><text x="784" y="436" text-anchor="middle" font-size="11" fill="#4F46E5">假设文档检索</text>
+    <rect x="876" y="396" width="178" height="50" rx="10" fill="#EEF2FF"/><text x="965" y="418" text-anchor="middle" font-size="13" font-weight="700" fill="#3730A3">Text2Cypher</text><text x="965" y="436" text-anchor="middle" font-size="11" fill="#4F46E5">NL 到查询评测集</text>
+
+    <g filter="url(#s4)"><rect x="40" y="484" width="1040" height="118" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <rect x="40" y="484" width="8" height="118" rx="4" fill="#0F766E"/>
+    <text x="68" y="514" font-size="13" font-weight="700" fill="#0F766E">L2  本体工程 / 验证 / 规则</text>
+    <rect x="68" y="530" width="180" height="50" rx="10" fill="#ECFDF5"/><text x="158" y="552" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">pySHACL</text><text x="158" y="570" text-anchor="middle" font-size="11" fill="#0F766E">数据契约门禁</text>
+    <rect x="260" y="530" width="210" height="50" rx="10" fill="#ECFDF5"/><text x="365" y="552" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">TopBraid SHACL</text><text x="365" y="570" text-anchor="middle" font-size="11" fill="#0F766E">Java / Jena 验证侧车</text>
+    <rect x="482" y="530" width="160" height="50" rx="10" fill="#ECFDF5"/><text x="562" y="552" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">OWL API</text><text x="562" y="570" text-anchor="middle" font-size="11" fill="#0F766E">OWL 2 工程接口</text>
+    <rect x="654" y="530" width="160" height="50" rx="10" fill="#ECFDF5"/><text x="734" y="552" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">Souffle</text><text x="734" y="570" text-anchor="middle" font-size="11" fill="#0F766E">Datalog 派生</text>
+    <rect x="826" y="530" width="228" height="50" rx="10" fill="#ECFDF5"/><text x="940" y="552" text-anchor="middle" font-size="13" font-weight="700" fill="#065F46">DMN 引擎（业务决策表）</text><text x="940" y="570" text-anchor="middle" font-size="11" fill="#0F766E">命中策略需显式锁定</text>
+
+    <g filter="url(#s4)"><rect x="40" y="618" width="1040" height="118" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+    <rect x="40" y="618" width="8" height="118" rx="4" fill="#334155"/>
+    <text x="68" y="648" font-size="13" font-weight="700" fill="#334155">L1  语义存储 / 查询底座</text>
+    <rect x="68" y="664" width="200" height="50" rx="10" fill="#F1F5F9"/><text x="168" y="686" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Apache Jena</text><text x="168" y="704" text-anchor="middle" font-size="11" fill="#64748B">RDF / SPARQL / Fuseki / SHACL</text>
+    <rect x="280" y="664" width="200" height="50" rx="10" fill="#F1F5F9"/><text x="380" y="686" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Oxigraph</text><text x="380" y="704" text-anchor="middle" font-size="11" fill="#64748B">嵌入式 RDF / SPARQL</text>
+    <rect x="492" y="664" width="200" height="50" rx="10" fill="#F1F5F9"/><text x="592" y="686" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">RDFLib</text><text x="592" y="704" text-anchor="middle" font-size="11" fill="#64748B">Python 适配层</text>
+    <rect x="704" y="664" width="350" height="50" rx="10" fill="#F1F5F9"/><text x="879" y="686" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">推荐最小试验：RDFLib + Oxigraph + pySHACL</text><text x="879" y="704" text-anchor="middle" font-size="11" fill="#64748B">只读查询 + 验证门槛，禁止 LLM 直接写库</text>
+  </g>
+</svg>
