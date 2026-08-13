@@ -1,0 +1,20 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Research run artifacts
+output/
+artifacts/
+*.sqlite
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Editors and OS
+.DS_Store
+.vscode/
+.idea/

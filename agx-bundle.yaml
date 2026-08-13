@@ -1,0 +1,19 @@
+agx_bundle: "1.0"
+name: "oag-deep-research"
+version: "0.1.0"
+description: "Ontology Augmented Generation deep-research method for evidence-grounded, auditable research."
+author: "Manus AI"
+license: "Apache-2.0"
+
+components:
+  skills:
+    - path: "skills/oag-deep-research/SKILL.md"
+      description: "Evidence-grounded OAG deep-research protocol."
+  avatars:
+    - name: "oag-researcher"
+      config_path: "avatars/oag-researcher.yaml"
+      description: "Researcher role preset for ontology-aware investigations."
+  memory_templates:
+    - name: "oag-research-memory"
+      path: "memory/oag-research-memory.md"
+      description: "Working memory template for entities, claims, evidence and open gaps."
