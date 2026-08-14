@@ -1,28 +1,28 @@
-# semantica DeepWiki Notes
+# Semantica DeepWiki 辅助资料记录
 
-> **使用边界。** DeepWiki 仅作为架构导航和设计解释的二级来源。本次锁定源码为 `94d0c3dc07109fb4e6df3027dbd571eeefc45d52`，而 DeepWiki 页面显示其索引提交为 `e90bd048`、最后索引日为 2026-08-08。因此，任何与当前行为、缺口优先级或采纳结论有关的主张均以本地固定源码为准。
+> **使用边界。** DeepWiki 仅是架构导航和设计解释的二级来源。本轮锁定源码为 `94d0c3dc07109fb4e6df3027dbd571eeefc45d52`，而页面显示 DeepWiki 的索引提交为 `e90bd048`、最后索引日为 2026-08-08。因此，凡涉及当前行为、缺口优先级或采纳裁决的主张，均以本地固定源码为准。
 
-## Source status
+## 来源状态
 
-| Field | Value |
+| 字段 | 值 |
 |---|---|
 | URL | <https://deepwiki.com/semantica-agi/semantica> |
-| Displayed index revision | `e90bd048` |
-| Accessed | 2026-08-14 (GMT+8) |
-| Evidence quality | low for current implementation; medium only as source-linked architecture navigation |
-| Interactive Q&A | Architecture question was filled and submission was attempted, but the page returned no answer. No generated answer is cited. |
+| 页面显示的索引版本 | `e90bd048` |
+| 访问时间 | 2026-08-14（GMT+8） |
+| 证据质量 | 对当前实现为低；只能作为带源码链接的架构导航，证据质量为中。 |
+| 交互问答 | 已填写并尝试提交架构问题，但页面未返回回答；没有引用任何生成式回答。 |
 
-## Required topic processing
+## 六项主题处理
 
-| Topic | DeepWiki observation / question status | Local-source cross-check | Status |
+| 主题 | DeepWiki 观察 / 问题状态 | 本地源码交叉核验 | 状态 |
 |---|---|---|---|
-| Architecture / data flow | Overview describes four layers: ingestion, processing, intelligence, application; page links context, decision intelligence, MCP and relevant source files. | MCP dispatch and decision flow verified in `semantica/mcp_server/__init__.py` and `context/decision_recorder.py`. | partially_verified |
-| Extension mechanisms | Navigation lists IDE plugins/skills and framework integrations; no generated Q&A answer returned. | `PluginRegistry` verifies path discovery, registration, dependency resolution and lifecycle. | partially_verified |
-| Reliability | Navigation exposes CI/CD/testing/security topics; no generated Q&A answer returned. | MCP parse/tool handling, decision exception propagation, plugin error wrapping and mocked decision tests were inspected. | partially_verified |
-| Performance / cost | No usable generated answer; overview describes broad stack only. | Static source shows a large dependency surface, but no benchmark or runtime performance claim was checked. | unverified |
-| Design trade-offs / limitations | No usable generated answer; indexed commit is stale relative to local lock. | Default `ContextGraph` is in-memory; MCP entrypoint is stdio and has no visible per-user policy; tests are mock-heavy for the decision recorder. | partially_verified |
-| AgenticX fit | No usable generated answer. | AgenticX already has MCP transports, policy controls and Graphiti/Kuzu memory graph; Semantica fits only as a separately evaluated, least-privilege service/adapter candidate. | verified by local sources, not by DeepWiki |
+| 架构与数据流 | 概览描述了摄入、处理、智能、应用四层，并链接上下文、决策智能、MCP 与相关源码。 | 已在 `semantica/mcp_server/__init__.py` 和 `context/decision_recorder.py` 核验 MCP 分派与决策流程。 | 部分核验 |
+| 扩展机制 | 导航列出 IDE 插件/技能与框架集成，但没有获得生成式问答回答。 | `PluginRegistry` 已证明路径发现、注册、依赖解析和生命周期存在。 | 部分核验 |
+| 可靠性 | 导航暴露 CI/CD、测试和安全主题，但没有获得生成式问答回答。 | 已审阅 MCP 解析/工具处理、决策异常重抛、插件错误包装和基于 mock 的决策测试。 | 部分核验 |
+| 性能与成本 | 没有可用的生成式回答；概览只描述广泛组件栈。 | 静态源码展示较大的依赖面，但本轮没有检查基准或运行性能主张。 | 未核验 |
+| 设计权衡与限制 | 没有可用的生成式回答；页面索引提交相对本地锁定版本陈旧。 | 默认 `ContextGraph` 为内存图；MCP 入口为 stdio，且没有可见的逐用户政策；决策记录测试以 mock 为主。 | 部分核验 |
+| AgenticX 适配 | 没有可用的生成式回答。 | AgenticX 已有 MCP 传输、政策控制和 Graphiti/Kuzu 记忆图；Semantica 只适合作为单独评估、最小权限的服务/适配候选。 | 已由本地源码核验，非 DeepWiki 核验 |
 
-## Consistency conclusion
+## 一致性结论
 
-DeepWiki’s broad component map is consistent with the presence of Semantica ingestion, graph, context, decision, reasoning, ontology, provenance and MCP packages. It is not sufficient to prove current implementation details because its indexed revision differs from the locked code. The completed study therefore records DeepWiki as **partial external context**, not as a source of high-confidence adoption evidence.
+DeepWiki 的宽泛组件图与 Semantica 仓库中存在的摄入、图、上下文、决策、推理、本体、溯源与 MCP 包方向一致。但由于其索引版本不同于本轮锁定代码，它不足以证明当前实现细节。完成的研究因此将 DeepWiki 记录为**部分外部上下文**，而不是高置信度采纳证据。
