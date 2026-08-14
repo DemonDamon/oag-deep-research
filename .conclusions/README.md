@@ -7,3 +7,4 @@
 | `project-overview.md` | 项目目标、架构、数据流与边界 | 改变项目定位、目录或主要交付物时 |
 | `agenticx-bundle.md` | Bundle 清单、技能、记忆与角色组件 | 改变任何 Bundle 组件或版本时 |
 | `research-contracts.md` | 主张账本 Schema 与研究质量契约 | 改变 JSON Schema、状态枚举或验收规则时 |
+| `code-deep-research-skill.md` | 代码深度调研的三文件产出、DeepWiki 深问流程与证据边界 | 修改 `.cursor/skills/code-deep-research/` 时 |
