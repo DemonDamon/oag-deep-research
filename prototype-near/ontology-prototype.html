@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ontology 产品原型 · 供应链本体</title>
+<style>
+:root{--bg:#f5f7fa;--panel:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--accent-soft:#eff6ff;--ok:#16a34a;--warn:#d97706;}
+html[data-theme=dark]{--bg:#0b1220;--panel:#101a2c;--border:#1e2b45;--text:#e6edf3;--muted:#8b9bb4;--accent:#4f8cff;--accent-soft:#13233f;--ok:#34d399;--warn:#fbbf24;}
+@media (prefers-color-scheme: light){html:not([data-theme]){--bg:#f5f7fa;--panel:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#2563eb;--accent-soft:#eff6ff;}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;font-size:14px}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+.topbar .logo{font-weight:800;font-size:15px;color:var(--accent)}
+.topbar .sub{color:var(--muted);font-size:12px}
+.topbar .spacer{flex:1}
+.topbar button{padding:6px 12px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:6px;cursor:pointer;font-size:13px}
+.topbar button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.layout{flex:1;display:grid;grid-template-columns:200px 1fr 360px;gap:1px;background:var(--border);overflow:hidden}
+.col{background:var(--panel);overflow:auto;padding:12px}
+.col h3{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.otype{padding:9px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.otype:hover{background:var(--accent-soft)}
+.otype.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.otype .cnt{font-size:11px;color:var(--muted);background:var(--bg);padding:1px 6px;border-radius:8px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--panel)}
+td{padding:7px 8px;border-bottom:1px solid var(--border);cursor:pointer;font-size:13px}
+tr:hover td{background:var(--accent-soft)}
+tr.sel td{background:var(--accent-soft)}
+.tag{font-size:11px;padding:1px 7px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+.detail h2{font-size:17px;margin-bottom:2px}
+.detail .oid{color:var(--muted);font-size:12px;margin-bottom:12px}
+.kv{margin-bottom:8px;font-size:13px}
+.kv .k{color:var(--muted);font-size:12px}
+.chip{display:inline-block;padding:2px 8px;margin:2px 3px 2px 0;border-radius:12px;background:var(--accent-soft);color:var(--accent);font-size:12px;cursor:pointer}
+.chip:hover{filter:brightness(1.08)}
+.actions{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.actions button{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;font-size:13px}
+.actions button.write{background:var(--accent);color:#fff;border-color:var(--accent)}
+.actions button.approval{background:var(--warn);color:#fff;border-color:var(--warn)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;width:420px;max-width:92vw}
+.modal label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+.modal input,.modal select{width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text)}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--ok);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;z-index:60}
+.toast.show{opacity:1}
+.permit{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">Ontology Studio</span>
+  <span class="sub">供应链领域本体 · 可点击演示</span>
+  <span class="spacer"></span>
+  <button onclick="toggleTheme()">🌓 主题</button>
+  <button class="primary" onclick="openCreate()">＋ 新建对象</button>
+</div>
+<div class="layout">
+  <div class="col" id="typeCol"><h3>对象类型</h3><div id="typeList"></div></div>
+  <div class="col" id="listCol"><h3 id="listTitle">对象列表</h3><div id="objTable"></div></div>
+  <div class="col" id="detailCol"><div id="detail"></div></div>
+</div>
+<div class="modal" id="modal">
+  <div class="box">
+    <h3 id="modalTitle">新建对象</h3>
+    <label>对象类型</label>
+    <select id="f_type"></select>
+    <label>名称</label>
+    <input id="f_name" placeholder="对象名称">
+    <label>状态</label>
+    <select id="f_status"><option>active</option><option>pending</option><option>archived</option></select>
+    <div class="actions" style="margin-top:16px">
+      <button class="write" onclick="doCreate()">创建</button>
+      <button onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// 本体元模型：类型 + 属性 + 链接定义
+const TYPES = {
+  Supplier:{label:'供应商',props:['name','status','location','creditRating'],links:[{k:'supplies',label:'供货零件',target:'Part',inverse:'suppliedBy'},{k:'fulfills',label:'履约订单',target:'Order',inverse:'placedWith'}]},
+  Part:{label:'零件',props:['name','status','sku','unitCost'],links:[{k:'suppliedBy',label:'由供应商供货',target:'Supplier',inverse:'supplies'},{k:'inOrder',label:'所属订单',target:'Order',inverse:'contains'},{k:'madeAt',label:'生产工厂',target:'Plant',inverse:'produces'}]},
+  Order:{label:'采购订单',props:['name','status','amount','etaDays'],links:[{k:'placedWith',label:'下单供应商',target:'Supplier',inverse:'fulfills'},{k:'contains',label:'包含零件',target:'Part',inverse:'inOrder'}]},
+  Plant:{label:'工厂',props:['name','status','city','capacity'],links:[{k:'produces',label:'生产零件',target:'Part',inverse:'madeAt'}]}
+};
+const OBJS = [
+  {id:'S-1001',type:'Supplier',name:'华南精密制造',status:'active',location:'深圳',creditRating:'A',supplies:['P-2001','P-2002'],fulfills:['O-3001']},
+  {id:'S-1002',type:'Supplier',name:'华东轴承集团',status:'active',location:'苏州',creditRating:'B+',supplies:['P-2003'],fulfills:[]},
+  {id:'P-2001',type:'Part',name:'高精度齿轮',status:'active',sku:'GEAR-42',unitCost:128,suppliedBy:['S-1001'],inOrder:['O-3001'],madeAt:['PL-4001']},
+  {id:'P-2002',type:'Part',name:'伺服电机',status:'active',sku:'SERVO-9',unitCost:840,suppliedBy:['S-1001'],inOrder:[],madeAt:['PL-4001']},
+  {id:'P-2003',type:'Part',name:'深沟球轴承',status:'pending',sku:'BRG-6204',unitCost:22,suppliedBy:['S-1002'],inOrder:['O-3001'],madeAt:['PL-4002']},
+  {id:'O-3001',type:'Order',name:'PO-2026-018',status:'active',amount:128000,etaDays:14,placedWith:['S-1001'],contains:['P-2001','P-2003']},
+  {id:'PL-4001',type:'Plant',name:'深圳一厂',status:'active',city:'深圳',capacity:8500,produces:['P-2001','P-2002']},
+  {id:'PL-4002',type:'Plant',name:'苏州二厂',status:'active',city:'苏州',capacity:12000,produces:['P-2003']}
+];
+let curType='Supplier', curId=null;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark')}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function renderTypes(){
+  $('typeList').innerHTML = Object.keys(TYPES).map(t=>{
+    const c=OBJS.filter(o=>o.type===t).length;
+    return `<div class="otype ${t===curType?'active':''}" onclick="selectType('${t}')">${TYPES[t].label}<span class="cnt">${c}</span></div>`;
+  }).join('');
+}
+function selectType(t){curType=t;curId=null;renderTypes();renderTable();renderDetail()}
+function renderTable(){
+  $('listTitle').textContent=TYPES[curType].label+' · 对象列表';
+  const rows=OBJS.filter(o=>o.type===curType);
+  const cols=['id','name','status'];
+  $('objTable').innerHTML=`<table><thead><tr>${cols.map(c=>`<th>${c==='id'?'ID':c==='name'?'名称':'状态'}</th>`).join('')}</tr></thead><tbody>`+
+    rows.map(o=>`<tr class="${o.id===curId?'sel':''}" onclick="selectObj('${o.id}')"><td>${esc(o.id)}</td><td>${esc(o.name)}</td><td><span class="tag">${esc(o.status)}</span></td></tr>`).join('')+
+    `</tbody></table>`;
+}
+function selectObj(id){curId=id;renderTable();renderDetail()}
+function renderDetail(){
+  if(!curId){$('detail').innerHTML=`<p style="color:var(--muted)">← 点击左侧类型，再点击对象查看详情</p>`;return}
+  const o=OBJS.find(x=>x.id===curId), T=TYPES[o.type];
+  let propRows=T.props.map(p=>`<div class="kv"><div class="k">${p}</div><b>${esc(o[p]??'—')}</b></div>`).join('');
+  let linkRows=T.links.map(l=>{
+    const targets=(o[l.k]||[]).map(tid=>{const t=OBJS.find(x=>x.id===tid);return t?`<span class="chip" onclick="jump('${tid}')">${TYPES[l.target].label}: ${esc(t.name)}</span>`:''}).join('');
+    return targets?`<div class="kv"><div class="k">${l.label}</div>${targets}</div>`:'';
+  }).join('');
+  $('detail').innerHTML=`<div class="detail"><h2>${esc(o.name)}</h2><div class="oid">${esc(o.id)} · ${TYPES[o.type].label}</div>${propRows}${linkRows}
+    <div class="actions">
+      <button class="write" onclick="writeBack()">✍ 写回 Action</button>
+      <button class="approval" onclick="submitApproval()">📋 提交变更审批</button>
+      <button onclick="jump(null)">🔗 查看对象图</button>
+    </div>
+    <div class="permit">🔒 对象级权限：当前角色 <b>采购分析员</b> 对该对象有 <b>只读+提案写回</b> 权限（范围 Token 已生效）</div></div>`;
+}
+function jump(id){curId=id;if(id){const o=OBJS.find(x=>x.id===id);curType=o.type;renderTypes()}renderTable();renderDetail()}
+function openCreate(){const s=$('f_type');s.innerHTML=Object.keys(TYPES).map(t=>`<option value="${t}">${TYPES[t].label}</option>`).join('');$('modal').classList.add('show')}
+function closeModal(){$('modal').classList.remove('show')}
+function doCreate(){
+  const t=$('f_type').value,n=$('f_name').value.trim()||'未命名对象',st=$('f_status').value;
+  const id=t.slice(0,2).toUpperCase()+'-'+(1000+Math.floor(Math.random()*9000));
+  const o={id,type:t,name:n,status:st};
+  TYPES[t].props.forEach(p=>{if(!(p in o))o[p]=p==='creditRating'?'B':p==='unitCost'?0:p==='amount'?0:p==='etaDays'?7:'—'});
+  TYPES[t].links.forEach(l=>o[l.k]=[]);
+  OBJS.push(o);curType=t;curId=id;renderTypes();renderTable();renderDetail();closeModal();
+  toast('✅ 已创建对象 '+id+'（模拟 Action 提案写回）');
+}
+function writeBack(){toast('✍ 已发起写回 Action：更新「'+OBJS.find(x=>x.id===curId).name+'」状态，待审批')}
+function submitApproval(){toast('📋 变更提案已提交，进入审批队列（proposal review）')}
+renderTypes();renderTable();renderDetail();
+</script>
+</body>
+</html>

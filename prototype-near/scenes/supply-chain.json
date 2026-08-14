@@ -1,0 +1,66 @@
+{
+  "id": "supply-chain",
+  "name": "制造供应链",
+  "desc": "供应商-零件-订单-工厂-合同 本体",
+  "types": {
+    "Supplier": {"label": "供应商", "color": "#2563eb"},
+    "Part": {"label": "零件", "color": "#7c3aed"},
+    "Order": {"label": "订单", "color": "#f59e0b"},
+    "Plant": {"label": "工厂", "color": "#16a34a"},
+    "Contract": {"label": "合同", "color": "#ef4444"}
+  },
+  "relKeywords": {
+    "supplies": ["供货", "供应", "供了", "供", "谁供", "由谁", "supply"],
+    "madeAt": ["生产", "制造", "产自", "哪生产", "工厂", "在哪生产", "made", "plant"],
+    "contains": ["包含", "含", "有哪些零件", "部件", "组成", "contains"],
+    "placedWith": ["下单", "下给", "采购", "订单给谁", "placed", "哪个供应商"],
+    "hasContract": ["合同", "协议", "签约", "contract"],
+    "credit": ["评级", "信用", "credit"],
+    "cost": ["成本", "价格", "多少钱", "cost", "单价"],
+    "location": ["在哪", "位于", "位置", "城市", "location"],
+    "capacity": ["产能", "capacity"]
+  },
+  "propMap": {
+    "credit": [["creditRating"], "信用评级"],
+    "cost": [["unitCost"], "单价"],
+    "location": [["location", "city"], "位置"],
+    "capacity": [["capacity"], "产能"]
+  },
+  "nodes": [
+    {"id": "S-1001", "type": "Supplier", "name": "华南精密制造", "props": {"location": "深圳", "creditRating": "A", "foundedYear": 2008}},
+    {"id": "S-1002", "type": "Supplier", "name": "华东轴承集团", "props": {"location": "苏州", "creditRating": "B+", "foundedYear": 2001}},
+    {"id": "S-1003", "type": "Supplier", "name": "西部材料科技", "props": {"location": "成都", "creditRating": "A-", "foundedYear": 2015}},
+    {"id": "P-2001", "type": "Part", "name": "高精度齿轮", "props": {"sku": "GEAR-42", "unitCost": 128, "category": "传动件"}},
+    {"id": "P-2002", "type": "Part", "name": "伺服电机", "props": {"sku": "SERVO-9", "unitCost": 840, "category": "电机"}},
+    {"id": "P-2003", "type": "Part", "name": "深沟球轴承", "props": {"sku": "BRG-6204", "unitCost": 22, "category": "轴承"}},
+    {"id": "P-2004", "type": "Part", "name": "铝合金壳体", "props": {"sku": "ALU-88", "unitCost": 156, "category": "结构件"}},
+    {"id": "P-2005", "type": "Part", "name": "电机控制器", "props": {"sku": "CTRL-7", "unitCost": 320, "category": "电控"}},
+    {"id": "O-3001", "type": "Order", "name": "PO-2026-018", "props": {"amount": 128000, "etaDays": 14, "status": "active"}},
+    {"id": "O-3002", "type": "Order", "name": "PO-2026-021", "props": {"amount": 460000, "etaDays": 30, "status": "active"}},
+    {"id": "PL-4001", "type": "Plant", "name": "深圳一厂", "props": {"city": "深圳", "capacity": 8500, "certLevel": "ISO9001"}},
+    {"id": "PL-4002", "type": "Plant", "name": "苏州二厂", "props": {"city": "苏州", "capacity": 12000, "certLevel": "ISO14001"}},
+    {"id": "PL-4003", "type": "Plant", "name": "成都三厂", "props": {"city": "成都", "capacity": 6000, "certLevel": "IATF16949"}},
+    {"id": "C-5001", "type": "Contract", "name": "年度框架采购协议", "props": {"term": "3年", "expiryDate": "2027-12", "totalValue": 2500000}}
+  ],
+  "edges": [
+    {"source": "S-1001", "target": "P-2001", "rel": "supplies", "label": "供货"},
+    {"source": "S-1001", "target": "P-2002", "rel": "supplies", "label": "供货"},
+    {"source": "S-1001", "target": "P-2005", "rel": "supplies", "label": "供货"},
+    {"source": "S-1002", "target": "P-2003", "rel": "supplies", "label": "供货"},
+    {"source": "S-1003", "target": "P-2004", "rel": "supplies", "label": "供货"},
+    {"source": "P-2001", "target": "PL-4001", "rel": "madeAt", "label": "生产于"},
+    {"source": "P-2002", "target": "PL-4001", "rel": "madeAt", "label": "生产于"},
+    {"source": "P-2005", "target": "PL-4001", "rel": "madeAt", "label": "生产于"},
+    {"source": "P-2003", "target": "PL-4002", "rel": "madeAt", "label": "生产于"},
+    {"source": "P-2004", "target": "PL-4003", "rel": "madeAt", "label": "生产于"},
+    {"source": "O-3001", "target": "P-2001", "rel": "contains", "label": "包含"},
+    {"source": "O-3001", "target": "P-2003", "rel": "contains", "label": "包含"},
+    {"source": "O-3001", "target": "P-2005", "rel": "contains", "label": "包含"},
+    {"source": "O-3002", "target": "P-2002", "rel": "contains", "label": "包含"},
+    {"source": "O-3002", "target": "P-2004", "rel": "contains", "label": "包含"},
+    {"source": "O-3001", "target": "S-1001", "rel": "placedWith", "label": "下单给"},
+    {"source": "O-3002", "target": "S-1002", "rel": "placedWith", "label": "下单给"},
+    {"source": "S-1001", "target": "C-5001", "rel": "hasContract", "label": "签订合同"},
+    {"source": "S-1002", "target": "C-5001", "rel": "hasContract", "label": "签订合同"}
+  ]
+}

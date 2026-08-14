@@ -52,21 +52,26 @@ a { color: inherit; }
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  height: 56px;
   padding: 0 16px 0 18px;
   background: #11131a;
   color: #f4f5f8;
   z-index: 4;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 214px;
+  flex: 0 0 auto;
   font-weight: 600;
   font-size: 14px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
+.brand-name { white-space: nowrap; }
 .brand-mark {
   width: 22px;
   height: 22px;
@@ -75,6 +80,7 @@ a { color: inherit; }
 }
 .switch {
   display: flex;
+  flex: 0 0 auto;
   padding: 3px;
   background: #1c2030;
   border-radius: 8px;
@@ -87,7 +93,10 @@ a { color: inherit; }
   font-weight: 500;
   padding: 6px 12px;
   border-radius: 6px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
+.switch .lbl-short { display: none; }
 .switch button.on {
   background: #2a3148;
   color: #fff;
@@ -95,7 +104,8 @@ a { color: inherit; }
 .switch button:active { transform: scale(0.97); }
 
 .top-search {
-  flex: 1;
+  flex: 1 1 160px;
+  min-width: 0;
   max-width: 520px;
   height: 32px;
   border: 0;
@@ -112,9 +122,12 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 0 0 auto;
   font-size: 12px;
   color: #c5cad6;
 }
+.user-meta { white-space: nowrap; line-height: 1.2; }
+.user-role { color: #8b93a7; font-size: 11px; }
 .avatar {
   width: 26px;
   height: 26px;
@@ -177,6 +190,8 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-bottom: 14px;
 }
 .crumb h1 {
@@ -441,6 +456,23 @@ a { color: inherit; }
 }
 
 .empty { color: var(--muted); font-size: 13px; padding: 20px; }
+
+@media (max-width: 1180px) {
+  .user-meta { display: none; }
+  .topbar { gap: 10px; }
+}
+
+@media (max-width: 980px) {
+  .switch .lbl-full { display: none; }
+  .switch .lbl-short { display: inline; }
+  .brand-sub { display: none; }
+  .top-search { max-width: 220px; }
+}
+
+@media (max-width: 780px) {
+  .top-search { display: none; }
+  .brand-name { display: none; }
+}
 
 @media (max-width: 720px) {
   .row.cols-3, .row.cols-2, .row.cols-graph, .compare { grid-template-columns: 1fr; }

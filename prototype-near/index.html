@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAG 多场景演示 · 本体图谱 + 真实问答</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root{--bg:#f5f7fa;--panel:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;--ok:#16a34a;--warn:#d97706;--rag:#0ea5e9}
+html[data-theme=dark]{--bg:#0b1220;--panel:#101a2c;--border:#1e2b45;--text:#e6edf3;--muted:#8b9bb4;--accent:#a78bfa;--ok:#34d399;--warn:#fbbf24;--rag:#38bdf8}
+@media (prefers-color-scheme: light){html:not([data-theme]){--bg:#f5f7fa;--panel:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;font-size:14px}
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+.topbar .logo{font-weight:800;font-size:15px;color:var(--accent)}
+.topbar .sub{color:var(--muted);font-size:12px}
+.topbar .spacer{flex:1}
+.topbar button{padding:6px 12px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:6px;cursor:pointer;font-size:12px}
+.topbar button:hover{border-color:var(--accent)}
+.scene-tabs{display:flex;gap:0;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+.scene-tab{padding:10px 18px;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
+.scene-tab:hover{color:var(--text)}
+.scene-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.main{flex:1;display:flex;overflow:hidden}
+.left{flex:1;padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.left .label{font-size:12px;color:var(--muted);font-weight:600}
+#chart{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:8px;min-height:300px}
+.right{width:420px;padding:12px;display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--border);overflow-y:auto}
+.qbar{display:flex;gap:6px}
+.qbar input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);font-size:13px}
+.qbar input:focus{outline:none;border-color:var(--accent)}
+.qbar button{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;white-space:nowrap}
+.qbar button:hover{opacity:.9}
+.examples{display:flex;flex-wrap:wrap;gap:6px}
+.examples .chip{padding:4px 10px;border:1px solid var(--border);border-radius:12px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s}
+.examples .chip:hover{border-color:var(--accent);color:var(--accent)}
+#engine{font-size:11px;color:var(--muted)}
+.answer{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
+.answer .q{font-weight:700;margin-bottom:6px;color:var(--accent)}
+.detail{font-size:12px;color:var(--muted);margin-top:8px}
+.evchain{margin-top:8px}
+.ev{padding:5px 8px;margin:3px 0;background:var(--bg);border-radius:4px;font-size:12px;cursor:pointer;transition:background .15s}
+.ev:hover{background:var(--border)}
+.ev .rel{color:var(--accent);font-weight:600}
+.nodedetail{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px}
+.nodedetail h4{font-size:13px;margin-bottom:6px}
+.nodedetail .prop{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;border-bottom:1px solid var(--border)}
+.nodedetail .prop span:first-child{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">OAG</span>
+  <span class="sub">本体增强生成 · 多场景演示</span>
+  <span class="spacer"></span>
+  <button onclick="toggleTheme()">🌙 主题</button>
+</div>
+<div class="scene-tabs" id="sceneTabs"></div>
+<div class="main">
+  <div class="left">
+    <div class="label">📊 本体知识图谱（点击节点查看详情）</div>
+    <div id="chart"></div>
+  </div>
+  <div class="right">
+    <div class="label">💬 OAG 问答</div>
+    <div class="qbar">
+      <input id="q" placeholder="输入问题..." onkeydown="if(event.key==='Enter')ask()">
+      <button onclick="ask()">问答</button>
+    </div>
+    <div class="examples" id="examples"></div>
+    <div id="engine"></div>
+    <div id="result"><div class="detail">选择场景后输入问题，或点击上方示例。</div></div>
+    <div id="nodePanel"></div>
+  </div>
+</div>
+<script>
+let chart, GRAPH, currentScene='';
+const SCENE_EXAMPLES={
+'supply-chain':['谁给 PO-2026-018 供应了齿轮？','高精度齿轮的供应商信用评级是多少？','深圳一厂生产哪些零件，成本多少？','华东轴承集团供了哪些零件，工厂在哪？'],
+'power-grid':['1号主变存在什么缺陷？','珠江500kV变电站有哪些设备？','主变油温异常导致什么后果？','10kV工业园甲线供电给哪个客户？'],
+'bank-aml':['华鑫贸易提交了什么贷款申请？','哪些交易被标记为可疑？','华鑫贸易的风险等级如何，用什么抵押？','哪些交易命中了制裁名单？']
+};
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark');if(chart){chart.dispose();chart=null}initChart();if(GRAPH)drawGraph()}
+async function loadScenes(){
+  const r=await fetch('/api/scenes');const scenes=await r.json();
+  const c=$('sceneTabs');c.innerHTML='';
+  scenes.forEach(s=>{
+    const t=document.createElement('div');t.className='scene-tab';t.textContent=s.name;
+    t.onclick=()=>selectScene(s.id);c.appendChild(t);
+  });
+  if(scenes.length>0)selectScene(scenes[0].id);
+}
+function selectScene(id){
+  currentScene=id;
+  document.querySelectorAll('.scene-tab').forEach((t,i)=>{
+    t.classList.toggle('active',i===Array.from(document.querySelectorAll('.scene-tab')).findIndex(x=>x.textContent===id));
+  });
+  loadGraph();loadExamples();
+}
+function loadExamples(){
+  const ex=SCENE_EXAMPLES[currentScene]||[];
+  const c=$('examples');c.innerHTML='';
+  ex.forEach(q=>{const s=document.createElement('span');s.className='chip';s.textContent=q;s.onclick=()=>{$('q').value=q;ask()};c.appendChild(s)});
+}
+async function loadGraph(){
+  const r=await fetch('/api/graph?scene='+currentScene);GRAPH=await r.json();
+  initChart();drawGraph();
+}
+function initChart(){
+  if(chart)return;
+  chart=echarts.init($('chart'),document.documentElement.getAttribute('data-theme')==='dark'?'dark':null);
+  chart.on('click',p=>{if(p.data&&p.data.id)showNode(p.data.id)});
+}
+function drawGraph(){
+  if(!chart||!GRAPH)return;
+  const cats=Object.entries(GRAPH.types).map(([id,t])=>({name:t.label,itemStyle:{color:t.color}}));
+  const nodes=GRAPH.nodes.map(n=>({id:n.id,name:n.name,category:Object.keys(GRAPH.types).indexOf(n.type),itemStyle:{color:GRAPH.types[n.type]?.color},label:{show:true,fontSize:11}}));
+  const links=GRAPH.edges.map(e=>({source:e.source,target:e.target,label:{show:true,formatter:e.label,fontSize:9,color:'#888'}}));
+  chart.setOption({tooltip:{formatter:p=>p.data.name||p.data.label?.formatter||''},legend:{data:cats.map(c=>c.name),bottom:0,textStyle:{color:'#888',fontSize:10}},series:[{type:'graph',layout:'force',roam:true,draggable:true,categories:cats,data:nodes,links:links,force:{repulsion:300,edgeLength:120,gravity:.08},lineStyle:{color:'#aaa',width:1,curveness:.1},emphasis:{focus:'adjacency',lineStyle:{width:3}},label:{position:'right'}}]},{replaceMerge:['series']});
+}
+async function showNode(id){
+  const r=await fetch('/api/node/'+id+'?scene='+currentScene);const n=await r.json();
+  if(n.error){return}
+  const props=Object.entries(n.props||{}).map(([k,v])=>`<div class="prop"><span>${esc(k)}</span><span>${esc(String(v))}</span></div>`).join('');
+  const typeName=GRAPH.types[n.type]?.label||n.type;
+  $('nodePanel').innerHTML=`<div class="nodedetail"><h4>${esc(n.name)} <span style="color:var(--muted);font-weight:400">(${esc(n.id)})</span></h4><div style="font-size:11px;color:var(--muted);margin-bottom:6px">类型: ${esc(typeName)}</div>${props}</div>`;
+  focusNode(id);
+}
+function focusNode(id){if(chart)chart.dispatchAction({type:'focusNodeAdjacency',seriesIndex:0,dataIndex:GRAPH.nodes.findIndex(n=>n.id===id)})}
+async function ask(){
+  const q=$('q').value.trim();if(!q)return;
+  $('result').innerHTML='<div class="detail">⏳ 正在做本体图多跳检索…</div>';
+  const r=await fetch('/api/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q,scene:currentScene})});
+  const d=await r.json();
+  $('engine').textContent='引擎: '+(d.engine==='deepseek'?'DeepSeek(LLM)':'确定性图检索(未配key)');
+  const evs=(d.evidence||[]).slice(0,12).map(e=>`<div class="ev" onclick="focusNode('${e.from}')"><span class="rel">${esc(e.label)}</span> ：${esc(e.fromName)}(${esc(e.from)}) → ${esc(e.toName)}(${esc(e.to)})</div>`).join('');
+  const seeds=(d.seeds||[]).map(esc).join(', ')||'(无显式种子，全图检索)';
+  const rels=(d.rels||[]).map(esc).join(', ')||'(未命中关系意图)';
+  $('result').innerHTML=`<div class="answer"><div class="q">Q: ${esc(d.question)}</div>${esc(d.answer)}</div>
+    <div class="detail" style="font-size:12px;color:var(--muted)">种子对象: ${seeds} · 关系意图: ${rels}</div>
+    <div class="evchain"><div style="font-size:12px;color:var(--muted);margin-bottom:6px">证据链（点击定位到图谱）：</div>${evs||'<div style="color:var(--muted);font-size:12px">无匹配证据</div>'}</div>`;
+}
+window.addEventListener('resize',()=>chart&&chart.resize());
+loadScenes();
+</script>
+</body>
+</html>

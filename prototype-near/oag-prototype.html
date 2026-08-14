@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OAG vs RAG 产品原型 · 本体增强生成</title>
+<style>
+:root{--bg:#f5f7fa;--panel:#ffffff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;--accent2:#2563eb;--rag:#0ea5e9;--oag:#7c3aed;--ok:#16a34a;--warn:#d97706;}
+html[data-theme=dark]{--bg:#0b1220;--panel:#101a2c;--border:#1e2b45;--text:#e6edf3;--muted:#8b9bb4;--accent:#a78bfa;--accent2:#4f8cff;--rag:#38bdf8;--oag:#a78bfa;}
+@media (prefers-color-scheme: light){html:not([data-theme]){--bg:#f5f7fa;--panel:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#7c3aed;--accent2:#2563eb;--rag:#0ea5e9;--oag:#7c3aed;}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;font-size:14px}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
+.topbar .logo{font-weight:800;font-size:15px;color:var(--accent)}
+.topbar .sub{color:var(--muted);font-size:12px}
+.topbar .spacer{flex:1}
+.topbar button{padding:6px 12px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:6px;cursor:pointer}
+.searchbar{display:flex;gap:10px;padding:14px 16px;background:var(--panel);border-bottom:1px solid var(--border);flex-wrap:wrap;align-items:center}
+.searchbar input{flex:1;min-width:260px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px}
+.searchbar button{padding:10px 18px;border-radius:8px;background:var(--accent);color:#fff;border:none;cursor:pointer;font-weight:600}
+.examples{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+.examples .ex{padding:5px 12px;border-radius:14px;background:var(--accent);color:#fff;font-size:12px;cursor:pointer;opacity:.85}
+.examples .ex:hover{opacity:1}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px;overflow:auto}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;overflow:auto;min-height:0}
+.card .head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card .head .badge{font-weight:800;font-size:13px}
+.card.rag .head .badge{color:var(--rag)}
+.card.oag .head .badge{color:var(--oag)}
+.card .head .desc{font-size:11px;color:var(--muted)}
+.body{padding:14px;overflow:auto;flex:1}
+.chunk{border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12.5px;background:var(--bg)}
+.chunk .score{color:var(--rag);font-size:11px;font-weight:700}
+.step{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px;font-size:13px}
+.step .n{width:22px;height:22px;border-radius:50%;background:var(--oag);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.step .t{color:var(--text)}
+.step .t .m{color:var(--muted);font-size:12px}
+.answer{background:var(--accent-soft,#f5f3ff);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:8px;font-size:13px;line-height:1.7}
+html[data-theme=dark] .answer{background:#1a1533}
+.ev{display:inline-block;padding:1px 8px;margin:1px 2px;border-radius:10px;background:var(--accent);color:#fff;font-size:11px;cursor:pointer}
+.ev:hover{filter:brightness(1.1)}
+.warnbox{border:1px dashed var(--warn);border-radius:8px;padding:8px 10px;margin-top:8px;font-size:12px;color:var(--warn)}
+.summary{margin:0 14px 14px;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;font-size:12px}
+.summary .cell .k{color:var(--muted);font-size:11px}
+.summary .cell .v{font-weight:700;margin-top:2px}
+.summary .cell .v.good{color:var(--ok)}.summary .cell .v.bad{color:var(--warn)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;width:400px;max-width:92vw}
+.modal .box h3{margin-bottom:8px}
+.modal .kv{margin:6px 0;font-size:13px}.modal .kv .k{color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">OAG Playground</span>
+  <span class="sub">本体增强生成 vs 检索增强生成 · 实时对比</span>
+  <span class="spacer"></span>
+  <button onclick="toggleTheme()">🌓 主题</button>
+</div>
+<div class="searchbar">
+  <input id="q" placeholder="输入问题，例如：谁给 PO-2026-018 供应了齿轮？" onkeydown="if(event.key==='Enter')run()">
+  <button onclick="run()">运行对比</button>
+  <div class="examples">
+    <span class="ex" onclick="use(0)">谁给订单供应了齿轮？</span>
+    <span class="ex" onclick="use(1)">深圳一厂生产哪些零件，成本多少？</span>
+    <span class="ex" onclick="use(2)">PO-2026-018 涉及哪些供应商与工厂？</span>
+  </div>
+</div>
+<div class="grid">
+  <div class="card rag">
+    <div class="head"><span class="badge">RAG · 检索增强生成</span><span class="desc">向量相似度召回文档片段 → 拼接 → 生成</span></div>
+    <div class="body" id="ragBody"></div>
+  </div>
+  <div class="card oag">
+    <div class="head"><span class="badge">OAG · 本体增强生成</span><span class="desc">实体→本体对象→关系多跳→受控生成</span></div>
+    <div class="body" id="oagBody"></div>
+  </div>
+</div>
+<div class="summary" id="summary"></div>
+<div class="modal" id="modal"><div class="box" id="modalBox"></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const OBJS={
+  'O-3001':{id:'O-3001',type:'采购订单',name:'PO-2026-018',status:'active',amount:'¥128,000',etaDays:14},
+  'P-2001':{id:'P-2001',type:'零件',name:'高精度齿轮',sku:'GEAR-42',unitCost:'¥128'},
+  'P-2002':{id:'P-2002',type:'零件',name:'伺服电机',sku:'SERVO-9',unitCost:'¥840'},
+  'P-2003':{id:'P-2003',type:'零件',name:'深沟球轴承',sku:'BRG-6204',unitCost:'¥22'},
+  'S-1001':{id:'S-1001',type:'供应商',name:'华南精密制造',location:'深圳',creditRating:'A'},
+  'S-1002':{id:'S-1002',type:'供应商',name:'华东轴承集团',location:'苏州',creditRating:'B+'},
+  'PL-4001':{id:'PL-4001',type:'工厂',name:'深圳一厂',city:'深圳',capacity:'8,500 件/月'},
+  'PL-4002':{id:'PL-4002',type:'工厂',name:'苏州二厂',city:'苏州',capacity:'12,000 件/月'}
+};
+const EDGES={
+  'O-3001':[['contains','P-2001'],['contains','P-2003'],['placedWith','S-1001']],
+  'P-2001':[['suppliedBy','S-1001'],['madeAt','PL-4001']],
+  'P-2003':[['suppliedBy','S-1002'],['madeAt','PL-4002']],
+  'P-2002':[['suppliedBy','S-1001'],['madeAt','PL-4001']]
+};
+const QS=[
+  {q:'谁给订单 PO-2026-018 供应了齿轮？',
+   steps:[['实体识别','识别实体：订单 O-3001、零件类型「齿轮」'],['本体对象定位','在 Ontology 中定位对象 O-3001（PO-2026-018）'],['关系多跳遍历','O-3001 --contains--> P-2001(高精度齿轮) --suppliedBy--> S-1001'],['受控生成','基于结构化对象与关系，生成可追溯答案']],
+   facts:[['供应商','S-1001'],['信用评级 A','S-1001'],['工厂','PL-4001']],
+   answer:'PO-2026-018（O-3001）中的<b>高精度齿轮（P-2001）</b>由供应商 <b>华南精密制造（S-1001）</b> 供货；该供应商信用评级为 <b>A</b>，所在地 <b>深圳</b>；该零件在 <b>深圳一厂（PL-4001）</b> 生产。',
+   ragChunks:[['采购流程手册 v3.pdf','第 12 页','齿轮类零件的采购通常由长期合作供应商完成，订单 PO-2026 系列涉及多个零部件……'],['供应商名录.xlsx','Sheet2','华南地区有多家精密制造企业，评级从 A 到 C 不等……'],['工厂产能报告.docx','第 4 节','深圳一厂主要生产高精度传动部件，月产能约 8500 件……']],
+   ragAnswer:'根据检索到的片段，该订单的齿轮零件可能由华南地区的供应商供货，具体供应商评级与工厂信息需进一步核对（文档片段未给出对象级关联）。'}];
+let qi=0;
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toggleTheme(){const h=document.documentElement;h.setAttribute('data-theme',h.getAttribute('data-theme')==='dark'?'light':'dark')}
+function use(i){qi=i;$('q').value=QS[i].q;run()}
+function run(){
+  const q=$('q').value.trim();
+  const hit=QS.find(x=>x.q.includes(q.split(' ')[0]))||QS[0];
+  renderRAG(hit);renderOAG(hit);renderSummary(hit);
+}
+function renderRAG(h){
+  $('ragBody').innerHTML=h.ragChunks.map(c=>`<div class="chunk"><span class="score">相似度 0.8${Math.floor(Math.random()*9)} · ${esc(c[0])} / ${esc(c[1])}</span><br>${esc(c[2])}</div>`).join('')
+    +`<div class="answer"><b>生成答案：</b>${h.ragAnswer}</div>`
+    +`<div class="warnbox">⚠ 无对象级关联，无法断言「供应商—零件—工厂」的确定关系；答案依赖文档片段拼接，存在口径不一致风险。</div>`;
+}
+function renderOAG(h){
+  $('oagBody').innerHTML=`<div style="font-size:12px;color:var(--muted);margin-bottom:6px">检索路径（可解释）</div>`
+    +h.steps.map((s,i)=>`<div class="step"><span class="n">${i+1}</span><span class="t"><b>${esc(s[0])}</b><br><span class="m">${esc(s[1])}</span></span></div>`).join('')
+    +`<div class="answer"><b>生成答案：</b>${h.answer}<br><br><b>证据链：</b>`+h.facts.map(f=>`<span class="ev" onclick="showObj('${f[1]}')">${esc(f[0])}</span>`).join(' ')+`</div>`;
+}
+function renderSummary(h){
+  $('summary').innerHTML=`
+    <div class="cell"><div class="k">关系利用</div><div class="v ${'good'}">RAG ✗ 孤立片段 / OAG ✓ 多跳关系</div></div>
+    <div class="cell"><div class="k">可追溯性</div><div class="v good">RAG 文档级 / OAG 对象级证据链</div></div>
+    <div class="cell"><div class="k">幻觉控制</div><div class="v good">RAG 有口径漂移 / OAG 受本体约束</div></div>
+    <div class="cell"><div class="k">治理能力</div><div class="v good">RAG 弱 / OAG 对象级权限+审计</div></div>`;
+}
+function showObj(id){
+  const o=OBJS[id];
+  if(!o)return;
+  let kvs=Object.keys(o).filter(k=>k!=='id'&&k!=='type').map(k=>`<div class="kv"><span class="k">${k}</span><br><b>${esc(o[k])}</b></div>`).join('');
+  $('modalBox').innerHTML=`<h3>${esc(o.type)} · ${esc(o.name)}</h3><div style="color:var(--muted);font-size:12px;margin-bottom:8px">${esc(o.id)}</div>${kvs}<button onclick="closeModal()" style="margin-top:10px;padding:6px 14px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:6px;cursor:pointer">关闭</button>`;
+  $('modal').classList.add('show');
+}
+function closeModal(){$('modal').classList.remove('show')}
+$('q').value=QS[0].q;run();
+</script>
+</body>
+</html>

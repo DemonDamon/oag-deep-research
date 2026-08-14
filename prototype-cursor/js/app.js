@@ -73,15 +73,15 @@
   function topbar() {
     return `
       <header class="topbar">
-        <div class="brand"><span class="brand-mark"></span> Orion 决策本体</div>
+        <div class="brand"><span class="brand-mark"></span><span class="brand-name">Orion<span class="brand-sub"> 决策本体</span></span></div>
         <div class="switch">
-          <button class="${state.product === "ontology" ? "on" : ""}" data-act="product" data-v="ontology">本体工作台</button>
-          <button class="${state.product === "oag" ? "on" : ""}" data-act="product" data-v="oag">OAG 对象问答</button>
+          <button class="${state.product === "ontology" ? "on" : ""}" data-act="product" data-v="ontology"><span class="lbl-full">本体工作台</span><span class="lbl-short">本体</span></button>
+          <button class="${state.product === "oag" ? "on" : ""}" data-act="product" data-v="oag"><span class="lbl-full">OAG 对象问答</span><span class="lbl-short">OAG</span></button>
         </div>
         <input class="top-search" placeholder="搜索对象 ID、工单、零件 SKU…" value="${state.search || ""}" data-act="search-input">
         <div class="userpill">
           <div class="avatar">林</div>
-          <div>${D.user.name}<div style="color:#8b93a7;font-size:11px">${D.user.role}</div></div>
+          <div class="user-meta">${D.user.name}<div class="user-role">${D.user.role}</div></div>
         </div>
       </header>`;
   }
