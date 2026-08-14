@@ -1,205 +1,156 @@
-# Code Deep Research Workflow
+# 代码深度调研工作流
 
-Follow this document in order. Update `meta.md` after every stage.
+严格按顺序执行。正常完成后只能产生三份 Markdown 研究文档；本地 `upstream/` 克隆不属于交付物，不得提交第三方源码。
 
-## Status semantics
+## 阶段 0：确定范围与工作区
 
-- `[ ]` pending; forbidden at final delivery.
-- `[x]` completed with evidence/artifact.
-- `[-]` not applicable or skipped; append the reason.
-- `[!]` blocked; stop all dependent stages and report.
+解析目标 GitHub URL，从最后一个路径段生成 `repo_name`：移除 `.git` 和尾部 `/`，仅保留字母、数字、`.`、`_`、`-`，其他字符替换为 `-`。
 
-```markdown
-## Research Status
-- [ ] S0 Scope, workspace, and tool availability confirmed
-- [ ] S1 Upstream cloned and commit SHA locked
-- [ ] S2 Relevant AgenticX baseline verified
-- [ ] S3 Upstream execution path verified from local source
-- [ ] S4 Applicable DeepWiki and extra URL sources processed
-- [ ] S5 Candidate claims cross-checked against source
-- [ ] S6 Gap analysis and verdict derived
-- [ ] S7 Proposal and evaluation gates written
-- [ ] S8 Final quality gates passed
+默认研究目录为：
+
+```text
+research/codedeepresearch/<repo_name>/
 ```
 
-S8 is marked only after checking S0–S7; it is not an input to its own gate.
+确认用户关注的问题。如果用户只要求源码深度分析，则不要自行扩展为 AgenticX 差距分析、选型、采纳裁决或实施方案。只有缺失信息会实质改变目标仓库、研究范围或运行权限时，才提出一个聚焦问题。
 
-## S0 — Scope, workspace, tools
+确认本轮只允许生成：
 
-Parse the GitHub URL and optional extra URLs. Normalize `repo_name` from the last URL segment: remove `/` and `.git`; preserve case; replace characters outside letters, digits, `.`, `_`, `-` with `-`.
-
-If absent, use these defaults and record them under `Assumptions`:
-
-- Research only; no AgenticX implementation.
-- Prefer zero new dependencies.
-- Maintainability/control and regression safety outrank latency/cost.
-- Analyze only modules relevant to the user’s stated goal.
-
-Ask one focused question only when a missing choice changes product direction, allowed dependencies, or research scope.
-
-Confirm the workspace contains `agenticx/`. Create the research directory and `meta.md`.
-
-Discover MCP server/tool schemas before calling them:
-
-- DeepWiki: architecture and design reasoning.
-- GitHub MCP: issues, PRs, commits, remote file samples.
-- ZRead: optional tree/read/search acceleration.
-
-If discovery is unavailable, mark that MCP unavailable rather than guessing names. Retry a failed MCP category at most once with corrected parameters. Never use write-side GitHub tools.
-
-## S1 — Lock upstream source
-
-Target: `research/codedeepresearch/<repo_name>/upstream/`.
-
-- New clone: use shallow clone and record remote, branch/tag, SHA, license, languages, monorepo status.
-- Existing clone: verify remote, SHA, and clean status. Reuse a clean matching clone without pulling.
-- Wrong remote or local modifications: mark blocked and ask the user; never reset, clean, or overwrite.
-- Clone failure: mark S1 `[!]`, stop normal SOP, and emit no Gap/Proposal/verdict.
-
-Existing research artifacts:
-
-- Same SHA: update in place and preserve Evidence IDs.
-- Different SHA: archive old Markdown under `archive/<old-sha>/` before writing current evidence. Ask first if moving may affect uncommitted work.
-- Unknown prior SHA: stop before overwriting.
-
-## S2 — Verify AgenticX baseline
-
-Read `conclusions/README.md` when present, select only conclusions relevant to the user goal, then inspect their referenced implementation.
-
-Minimum evidence:
-
-1. Relevant conclusion/documentation.
-2. Corresponding implementation file and symbol.
-
-Create an `AgenticX Evidence` table in the Gap report: capability, path, symbol, current behavior. Record searched paths and search terms. State only “not found in the explicitly checked scope”, never “does not exist anywhere”.
-
-Compare 12-Factor Agents, Unified Tool V2, Compiled Context, Hooks/Flow, or other advanced capabilities only when they share responsibility with the upstream mechanism.
-
-## S3 — Verify upstream source
-
-Use local Read/Glob/Grep as the primary path. Shell is for git, isolated setup, examples, and tests—not generic file reading.
-
-Read at least six evidence categories:
-
-1. Public entry/API.
-2. Core abstraction.
-3. Main execution-path implementation.
-4. Error/fallback handling.
-5. Extension point.
-6. Relevant test or example.
-
-For every candidate mechanism locate, or explicitly report not found:
-
-- API/config entry.
-- Core execution function.
-- State/data model.
-- Failure handling.
-- Test/example.
-
-Runtime validation:
-
-- Do not install global dependencies, run arbitrary installer scripts, use sudo, or initialize paid/destructive services without user approval.
-- Approved setup must stay inside `upstream/` using an isolated environment.
-- Default maximum for one first run is five minutes.
-- If credentials/services are unavailable, use static verification and record `runtime_validation = static_only` or `blocked_or_timeout`.
-
-Create:
-
-- `<repo_name>_source_notes.md`
-- `<repo_name>_code_index.md`
-
-Every decision-relevant claim needs an Evidence ID:
-
-```markdown
-| Evidence ID | Claim | Source type | Exact location | SHA/number | Confidence |
-|-------------|-------|-------------|----------------|------------|------------|
-| E-001 | ... | local-source | SHA + path:lines + symbol | ... | high |
+```text
+<repo_name>_source_notes.md
+<repo_name>_code_index.md
+<repo_name>_deepwiki.md
 ```
 
-Confidence:
+## 阶段 1：拉取并锁定源码
 
-- `high`: locked local source proves implementation. Issue/PR may be high only for maintainer intent/history.
-- `medium`: official docs plus partial local support.
-- `low`: DeepWiki/blog/inference without direct implementation proof.
+将目标仓库克隆到：
 
-Implementation P0/P1 claims require `local-source high`.
-
-The code index must include tool availability, a 2–3-level core tree, actual files read, key symbols with line ranges, search terms, and high-signal Issue/PR entries when available.
-
-## S4 — Process external sources
-
-DeepWiki, when available: ask one question for each topic:
-
-1. Architecture/data flow.
-2. Extension mechanisms.
-3. Reliability.
-4. Performance/cost.
-5. Design trade-offs/limitations.
-6. AgenticX fit.
-
-Ask follow-ups only for contradictions or critical gaps. For each answer mark `verified`, `partially_verified`, or `unverified` and attach Evidence IDs. Unverified claims cannot enter P0/P1.
-
-For each extra URL, save Markdown under `sources/` with author/organization, evidence quality, and consistency with locked source. Record each source status in `meta.md`. If no source applies, mark S4 `[-]` with reason.
-
-## S5 — Cross-check
-
-In source notes, create a table:
-
-```markdown
-| Claim | Evidence | Result (yes/no/partial) | Corrected wording |
-|-------|----------|-------------------------|-------------------|
+```text
+research/codedeepresearch/<repo_name>/upstream/
 ```
 
-Cover every candidate mechanism, not only easy claims. Conflict precedence:
+优先浅克隆，并记录远程 URL、分支或标签、固定 commit SHA、许可证、主要语言和是否为 monorepo。若已有克隆，必须核验远程、SHA 与工作区清洁状态；远程不符或存在本地修改时停止，不执行 reset、clean 或覆盖。
 
-`locked local source > same-SHA official Issue/PR > official docs > DeepWiki > third-party article`.
+克隆失败时，不得继续正常源码研究，也不得用 README 或 DeepWiki 冒充源码分析。向用户报告阻塞原因。
 
-Issues/PRs prove intent/history, not current implementation. With no external sources, still review every candidate claim and mark S5 `[x]` with `local-only; no external claims`.
+`upstream/` 仅供本地研究，必须被版本控制忽略。不要把第三方源码复制进研究仓库。
 
-## S6 — Gap analysis and verdict
+## 阶段 2：源码初读与证据地图
 
-Use the Gap template from TEMPLATES.md for every candidate.
+DeepWiki 之前，先通过本地文件读取、路径匹配和全文检索完成初读。至少覆盖以下六类证据：
 
-`User problem` must come from user words, an AgenticX issue/failure, an existing requirement, or a reproducible experiment. Otherwise write `unvalidated hypothesis`; priority cannot exceed P2.
+| 类别 | 必须回答的问题 |
+|---|---|
+| 公开入口/API | 用户或外部系统从哪里进入？配置如何进入运行时？ |
+| 核心抽象 | 哪些类型、协议或数据模型定义系统语义？ |
+| 主执行路径 | 一个代表性请求、任务或数据单元如何端到端流动？ |
+| 状态与持久化 | 状态在哪里保存，生命周期、一致性和版本语义是什么？ |
+| 失败与回退 | 异常如何传播、重试、降级、回滚或被观测？ |
+| 扩展点与测试 | 插件、适配器、Hook 或协议如何扩展？测试真正验证了什么？ |
 
-P0 requires all:
+先阅读项目说明和架构文档用于导航，再阅读真实实现、配置和相关测试。对每个候选机制定位：API/配置入口、核心执行函数、状态模型、失败处理和测试或示例。只能在锁定源码中找不到时写“在已检查范围内未找到”，不要写“项目不存在该能力”。
 
-- Real user problem.
-- `local-source high` upstream evidence.
-- Code-level AgenticX gap in checked scope.
-- A two-week verifiable closure path.
+在 `<repo_name>_code_index.md` 中持续记录核心目录树、实际阅读文件、符号与行号、检索词和未覆盖范围；在 `<repo_name>_source_notes.md` 中记录初步机制与 Evidence ID。
 
-Derive verdict mechanically:
+## 阶段 3：从源码生成 5–10 个深度问题
 
-- Any valid P0 → `ADOPT`.
-- No P0 but at least one evidence-backed, user-validated P1 → `SELECTIVE_ADOPT`.
-- Only P2/NO-GAP or unvalidated value → `DO_NOT_ADOPT`.
+只能在阶段 2 完成后构造问题。先列出已观察事实和未解决设计点，再选出 5–10 个最高价值问题。问题数量少于 5 或多于 10 均不合格。
 
-## S7 — Proposal and next steps
+### 问题构造格式
 
-Use exactly one Proposal template from TEMPLATES.md.
+每个问题必须包含以下字段：
 
-- `ADOPT` / `SELECTIVE_ADOPT`: implementation-oriented template with required evaluation section.
-- `DO_NOT_ADOPT`: non-adoption template; do not invent PoC/MVP work.
+| 字段 | 要求 |
+|---|---|
+| Question ID | 使用 `Q-01` 至 `Q-10`。 |
+| 代码锚点 | 至少一个 `SHA + path:line-range + symbol`。 |
+| 已观察事实 | 只陈述本地源码已经证明的行为。 |
+| 未知设计点 | 指出源码初读无法充分解释的机制、边界或权衡。 |
+| 研究价值 | 说明答案为何影响正确性、扩展性、可靠性、安全性或成本。 |
+| 发给 DeepWiki 的问题 | 使用完整、项目特定、可追踪到代码的复杂问题。 |
 
-Do not create `.cursor/plans/` documents or implementation tasks unless the user separately requests implementation.
+### 选题覆盖
 
-Write “下一步规划调整” as the final Proposal section and summarize it in the final response.
+根据项目实际情况，从下列维度选出最相关的至少五类，而非机械覆盖全部：
 
-## S8 — Quality gate
+1. 端到端控制流与数据流。
+2. 核心抽象、对象关系与不变量。
+3. 状态生命周期、持久化、一致性与并发。
+4. 错误传播、重试、降级、恢复与幂等。
+5. 扩展协议、插件隔离和兼容性。
+6. 身份、授权、租户或信任边界。
+7. 性能复杂度、缓存、批处理和资源成本。
+8. 可观测性、调试和审计。
+9. 测试策略、未覆盖路径与运行假设。
+10. 关键设计取舍、替代方案与历史约束。
 
-All must pass:
+### 禁止的问题
 
-- `upstream/` exists; `meta.md` has locked SHA.
-- S0–S7 are `[x]` or legitimate `[-]`; none are `[ ]` or `[!]`.
-- All six source evidence categories were inspected.
-- Evidence IDs resolve from Gap/Proposal to exact source locations.
-- Code index records local/GitHub/ZRead provenance.
-- Every candidate is cross-checked.
-- AgenticX checked paths/search terms are recorded.
-- Each P0/P1 has Gap ID, acceptance evidence, and scope boundary.
-- Verdict matches Gap priorities.
-- Unrun examples, missing Issues/PRs, and unverified mechanisms are explicit.
-- ZRead failure is not treated as source-study incompleteness.
+不要提问“请介绍项目架构”“有哪些主要模块”“有什么优缺点”等可由 README 回答的泛化问题。不要在没有代码锚点时询问产品愿景。不要把五个无关问题拼成一个长问题。不要诱导 DeepWiki确认预设结论。
 
-Fix failures before claiming completion, then mark S8 `[x]`.
+合格问题应同时触达**机制、边界与权衡**。例如：
+
+> `ContextGraph.add_relation()` 同时维护时间字段和图存储状态，而默认后端为内存实现。关系有效期、重复写入与并发更新分别依赖哪些不变量？替换持久化后端时，哪些一致性语义由接口保证，哪些必须由适配器补充？请指向相关实现与测试。
+
+## 阶段 4：逐题询问 DeepWiki
+
+先记录 DeepWiki 页面或索引对应的 commit；若无法确定，写明 `index_sha = unknown`。若其索引 SHA 与本地锁定 SHA 不同，必须把差异放在 `<repo_name>_deepwiki.md` 开头，并降低证据等级。
+
+逐题发送阶段 3 的 5–10 个问题。每题保存：
+
+1. 问题原文。
+2. DeepWiki 回答的忠实摘要；必要时保存短引文。
+3. DeepWiki 提到的文件、符号、设计理由或测试。
+4. 回答是否完整，以及是否需要一个针对矛盾或关键缺口的追问。
+
+每个初始问题最多做两次聚焦追问。追问不计入 5–10 个初始问题数量。不要把网页生成内容直接写成实现事实。
+
+若 DeepWiki 不可用、页面没有该仓库、提问失败或未返回有效内容，仍必须创建 `<repo_name>_deepwiki.md`。保留全部问题、尝试时间、失败原因与 `未验证` 状态，禁止编造回答，也不得用其他博客冒充 DeepWiki。
+
+## 阶段 5：回到源码逐项核验
+
+对每个 Question ID，依据锁定源码检查 DeepWiki 回答中的核心主张。验证顺序为：
+
+```text
+锁定本地源码 > 同一 SHA 的官方 Issue/PR > 官方文档 > DeepWiki > 第三方资料
+```
+
+每题必须给出以下状态之一：
+
+| 状态 | 含义 |
+|---|---|
+| `已验证` | 锁定源码直接支持核心主张。 |
+| `部分验证` | 只有部分主张得到源码支持，或证据来自不同 SHA。 |
+| `与源码冲突` | 锁定源码显示不同实现或边界。 |
+| `未验证` | 已检查范围内没有足够证据。 |
+
+为 `部分验证`、`与源码冲突` 和 `未验证` 写出纠正后的安全表述。DeepWiki 提到但本地不存在的文件、符号或行为必须显式标记。所有进入 `<repo_name>_source_notes.md` 的结论应引用 Evidence ID；DeepWiki 只能作为辅助来源，不能独立证明关键实现行为。
+
+## 阶段 6：完成三份文档
+
+使用 [TEMPLATES.md](TEMPLATES.md) 的三个模板。文件之间应这样分工：
+
+| 文件 | 不应重复的内容 |
+|---|---|
+| Source Notes | 解释“系统如何工作”与经核验结论，不复制完整文件清单或逐题 DeepWiki 原文。 |
+| Code Index | 解释“证据在哪里、读过什么、还没读什么”，不写长篇架构判断。 |
+| DeepWiki | 解释“为什么问这些问题、DeepWiki 怎么回答、源码如何裁决”，不取代 Source Notes。 |
+
+自然语言默认使用中文；代码符号、协议名、配置键、错误字符串与原文短引保持原样。
+
+## 阶段 7：质量门
+
+宣布完成前逐项检查：
+
+- 本地 `upstream/` 存在，远程正确，固定 SHA 已写入三份文档。
+- 六类源码证据均已检查，或明确说明不适用原因。
+- 代码索引包含 2–3 层核心树、实际阅读文件、关键符号、行号与检索覆盖。
+- 源码笔记中的每个关键实现主张均能解析到 Evidence ID 和精确位置。
+- DeepWiki 文档包含 5–10 个由代码锚定的初始问题。
+- 每题均记录回答或失败状态，并有源码复核结果与安全表述。
+- DeepWiki 与本地 SHA 差异、未运行测试、缺少凭据/服务和未覆盖模块均显式说明。
+- 没有创建 `meta.md`、Gap、Proposal、Eval Plan 或其他额外交付物。
+- 没有提交 `upstream/`、第三方源码、依赖、环境文件或凭据。
+
+任一质量门失败时先修正，再交付。最终回复只链接三份文档，并概述固定 SHA、最重要的源码结论和未验证项。

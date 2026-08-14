@@ -1,67 +1,59 @@
 ---
 name: code-deep-research
-description: Use when deeply researching an open-source GitHub repository for AgenticX adoption, selective mechanism internalization, gap analysis, or an evidence-backed implementation proposal.
+description: 深度拆解开源 GitHub 仓库的源码架构与核心技术设计。用于需要先拉取并锁定源码、建立代码索引、提出 5–10 个由真实代码牵引的复杂问题、通过 DeepWiki 辅助追问并回到本地源码核验的任务；固定只输出 source_notes、code_index 和 deepwiki 三份研究文档。
 ---
 
-# Code Deep Research
+# 代码深度调研
 
-## Overview
+## 目标
 
-Research an upstream repository from a locked commit, compare it with verified AgenticX code, and make an evidence-backed adoption decision. The local upstream clone is the source of truth; MCP tools accelerate discovery but never replace source verification.
+从固定提交的本地源码出发，重建项目的核心抽象、执行路径、状态模型、失败语义与扩展边界，再提出能够牵引出关键设计细节的深度问题。DeepWiki 只用于辅助解释与发现线索，锁定提交的本地源码始终是实现事实的最高优先级证据。
 
-## When to Use
+## 适用范围
 
-Use for:
-- `/codedeepresearch` requests.
-- “调研这个 GitHub 项目能否集成进 AgenticX”。
-- Comparing an upstream framework, SDK, agent runtime, tool, memory, planner, UI, or protocol with AgenticX.
-- Producing `ADOPT`, `SELECTIVE_ADOPT`, or `DO_NOT_ADOPT` recommendations.
+在用户要求深度研究 GitHub 仓库、拆解源码架构、理解核心机制，或明确要求“先拉代码再问 DeepWiki”时使用本技能。快速 API 查询、单文件代码审查、已批准方案的编码实现，以及不涉及源码仓库的一般网络调研，不使用本技能。
 
-Do not use for:
-- Implementing an already-approved plan.
-- General web research without a required GitHub repository.
-- A quick API lookup or a review of one known source file.
+## 必读文件
 
-## Required References
+执行前完整阅读 [WORKFLOW.md](WORKFLOW.md)，创建文档前阅读 [TEMPLATES.md](TEMPLATES.md)。不要仅凭本页摘要推断详细步骤。
 
-Before taking research actions:
+## 唯一交付物
 
-1. Read [WORKFLOW.md](WORKFLOW.md) completely.
-2. Copy its S0–S8 status ledger into `research/codedeepresearch/<repo_name>/meta.md`.
-3. Read [TEMPLATES.md](TEMPLATES.md) before creating research artifacts.
+对仓库名 `<repo_name>`，只创建以下三份 Markdown 文档：
 
-Do not infer the workflow from this summary alone.
+| 文件 | 责任 |
+|---|---|
+| `<repo_name>_source_notes.md` | 解释源码中的核心抽象、数据与状态、执行路径、失败处理、扩展点和经核验结论。 |
+| `<repo_name>_code_index.md` | 记录固定 SHA、核心目录树、实际阅读文件、关键符号、行号范围、测试与检索覆盖。 |
+| `<repo_name>_deepwiki.md` | 保存源码初读后形成的 5–10 个复杂问题、DeepWiki 回答、版本状态及逐项源码复核。 |
 
-## Non-Negotiable Rules
+当目标仓库为 Semantica 时，文件名必须是 `semantica_source_notes.md`、`semantica_code_index.md` 和 `semantica_deepwiki.md`。
 
-- Clone the repository into `research/codedeepresearch/<repo_name>/upstream/` and lock its SHA.
-- A failed clone blocks normal research. Do not emit Gap, Proposal, P0/P1, or an adoption verdict.
-- Verify implementation claims against local source using `SHA + path + line range + symbol`.
-- DeepWiki, GitHub MCP, and ZRead are optional accelerators. Discover their schemas before use; failure must follow the documented fallback.
-- ZRead quota failure never makes a successful local-source study “incomplete”.
-- Do not modify AgenticX production code during research.
-- Do not invent benchmarks, user needs, issue numbers, runtime validation, or repository behavior.
-- Do not create an implementation plan or code task unless the user separately requests implementation.
+不要自动创建 `meta.md`、Gap Analysis、Proposal、Evaluation Plan、采用裁决或其他报告。用户另行要求比较、选型或实施方案时，把必要内容并入三份文件中的相应章节；除非用户明确授权，不增加第四份交付物。
 
-## Decision Rule
+## 强制顺序
 
-Determine Gap priority first, then derive the verdict:
+1. 拉取目标仓库到本地工作区，核验远程地址并锁定 commit SHA。
+2. 初读仓库结构、公开入口、核心抽象、主执行路径、状态模型、失败处理、扩展点和测试。
+3. 基于初读代码提出 **5–10 个项目特定的复杂技术问题**。每个问题必须引用代码锚点，说明未知点和研究价值；禁止先看 DeepWiki 再反向编造问题。
+4. 逐题询问 DeepWiki，并保存回答、引用路径、索引版本和失败状态。
+5. 回到锁定源码逐项核验回答，标记 `已验证`、`部分验证`、`与源码冲突` 或 `未验证`，给出纠正后的结论。
+6. 完成三份文档并通过质量门。
 
-- `ADOPT`: at least one valid P0.
-- `SELECTIVE_ADOPT`: no P0, but at least one evidence-backed P1 with a real user problem.
-- `DO_NOT_ADOPT`: only P2/NO-GAP, unvalidated demand, or insufficient value.
+## 深度问题标准
 
-Do not promote a Gap to force a desired verdict.
+问题必须由已观察到的类、函数、协议、数据结构、配置或测试牵引，不能只问“项目架构是什么”或“有哪些优点”。每个问题应尽量同时追问**机制、边界与权衡**，并覆盖 5–10 个最相关维度，例如端到端数据流、状态不变量、持久化与一致性、并发与事务、失败恢复、扩展协议、安全边界、性能成本、可观测性或关键设计取舍。
 
-## Completion Rule
+一个合格问题的形式如下：
 
-Only claim completion when S0–S7 are completed or legitimately skipped, all quality gates in WORKFLOW pass, and S8 is then marked complete. Final chat output must lead with the verdict and link the written artifacts.
+> `ContextGraph.add_relation()` 同时维护时间字段和图存储状态，而默认后端为内存实现。关系有效期、重复写入和并发更新分别依赖哪些不变量？替换为持久化后端时，哪些一致性语义由接口保证，哪些必须由适配器补充？
 
-## Common Failures
+## 证据规则
 
-- Starting with DeepWiki instead of locking the upstream SHA.
-- Treating README or MCP-generated code as implementation evidence.
-- Reading only upstream code and assuming AgenticX lacks the capability.
-- Turning every upstream feature into a P0.
-- Forcing PoC/MVP sections when the correct verdict is `DO_NOT_ADOPT`.
-- Leaving stale evidence from an older upstream SHA in current artifacts.
+实现主张必须指向 `SHA + 文件路径 + 行号范围 + 符号`。README、官方文档和 DeepWiki 可解释意图，但不能替代本地源码。若 DeepWiki 索引提交与锁定 SHA 不一致，必须显式记录版本差异。若 DeepWiki 不可用或未返回有效回答，仍必须创建 `<repo_name>_deepwiki.md`，保留 5–10 个问题、尝试记录和未验证状态，不得伪造答案。
+
+不要安装全局依赖、执行未知安装脚本、启动付费或破坏性服务、使用真实凭据，或修改被研究项目。需要运行验证时，先取得用户授权，并限制在隔离环境中。
+
+## 完成条件
+
+只有在仓库已锁定 SHA、六类源码证据已覆盖、5–10 个深度问题均已记录、每个 DeepWiki 回答均已回到源码复核、三份文件相互引用一致且未创建多余交付物时，才能宣布完成。最终回复只需说明锁定版本、三份文件路径、最重要的技术结论与仍未验证事项。
