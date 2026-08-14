@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+@page { size: A4; margin: 1.5cm; }
+body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 13px; line-height: 1.7; color: #333; }
+h1 { font-size: 22px; border-bottom: 2px solid #333; padding-bottom: 6px; margin-top: 24px; }
+h2 { font-size: 18px; border-bottom: 1px solid #999; padding-bottom: 5px; margin-top: 20px; }
+h3 { font-size: 15px; margin-top: 16px; }
+h4 { font-size: 13px; margin-top: 14px; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 12px; }
+th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+th { background-color: #f5f5f5; font-weight: 600; }
+tr:nth-child(even) { background-color: #fafafa; }
+img { width: 100% !important; max-width: 100% !important; height: auto !important; display: block; margin: 12px 0; page-break-inside: avoid; }
+blockquote { border-left: 4px solid #4A90D9; margin: 10px 0; padding: 6px 12px; background: #f8f9fa; color: #555; }
+code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-size: 12px; }
+pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+</style>
+</head>
+<body>
+<h1 id="palantir">Palantir 本体论产品与开源平替：调研报告</h1>
+<blockquote>
+<p>本报告基于 <code>oag-deep-research</code> 仓库的调研材料整理。所有结论区分三类证据：Palantir 官方产品文档与技术博客（描述公开产品主张）、同行评审论文与公开实现（建立可验证基线）、以及本仓库本地浅克隆的静态评估。</p>
+<p>配图采用 SVG 与 GIF 动画，SVG 位于 <code>assets/</code> 目录，数据流图位于 <code>prototype/prototype-near/out/</code>。</p>
+</blockquote>
+<hr />
+<h2 id="_1">执行摘要</h2>
+<p>本报告回答四个核心问题：Palantir 本体论产品是什么、开源平替有哪些、企业如何自建、如何跨项目迁移。</p>
+<p><strong>核心结论</strong>：</p>
+<ol>
+<li>Palantir Ontology 不是知识图谱产品，而是 Foundry 平台内建的<strong>操作型语义层</strong>——对象可写、动作可治理、权限可下沉到实例级。</li>
+<li>没有任何单一开源项目是 Foundry 的 1:1 等价物。开源组件能覆盖图存储、约束校验、检索增强等能力层，但难以覆盖一体化操作型本体、企业级治理、平台级工程化三个护城河。</li>
+<li>企业自建的最高风险点是<strong>语义建模成本</strong>（P0）和<strong>受控写回一致性</strong>（P0），其次是图向量混合检索（P1）和 Agent 可治理接入（P1）。</li>
+<li>跨项目迁移的关键是「ontology-as-code」——将本体骨架与领域术语分离，封装为版本化资产包，在目标项目中实例化而非复制代码。</li>
+<li>本团队已构建 OAG Prototype（三场景：制造供应链、南网能源、银行反洗钱），验证了 L2-L4 层的可行性，L1/L5/L6 层尚待补全。</li>
+</ol>
+<hr />
+<h2 id="palantir_1">一、Palantir 的本体论产品有哪些，产品形态如何</h2>
+<h3 id="11">1.1 产品定位</h3>
+<p>Palantir 的核心产品是 <strong>Foundry</strong> 及其上的 <strong>AIP（AI Platform）</strong>，其本体论能力统称为 <strong>Ontology（本体）</strong>。它不是一个独立售卖的知识图谱产品，而是 Foundry 平台内建的<strong>操作型语义层</strong>。</p>
+<p>Palantir 的 Ontology 一句话定位：<strong>把企业分散的数据、业务规则、业务动作和权限，组织成同一套「可操作业务世界」，再在这个世界之上承载应用、分析与 Agent</strong>。它区别于传统知识图谱的关键在于：本体不是给分析师查询用的静态图，而是业务系统的<strong>可写、可动作、可治理</strong>的数字孪生底座。</p>
+<h3 id="12">1.2 产品形态（分层视图）</h3>
+<p><img alt="Palantir 产品形态" src="tmp_svg2png/fig1-palantir-product-shape.png" /></p>
+<p>从下到上六层，构成 Palantir 本体的完整产品形态：</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>组件</th>
+<th>产品形态说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 应用与交互层</td>
+<td>AIP 应用、Workshop 工作台、应用市场</td>
+<td>员工看到的是<strong>业务任务界面</strong>（告警/任务收件箱、共同运营态势图），而非检索问答框</td>
+</tr>
+<tr>
+<td>② 操作型本体层</td>
+<td>Object（对象）、Property（属性）、Link（链接）</td>
+<td><strong>核心</strong>。对象有稳定 ID 与类型，可构成数字孪生；定位在数据集/虚拟表/模型之上</td>
+</tr>
+<tr>
+<td>③ 逻辑与动作层</td>
+<td>Action、Function</td>
+<td>Action 是带用户定义逻辑的<strong>事务写回</strong>；Function 承载任意复杂度业务逻辑</td>
+</tr>
+<tr>
+<td>④ SDK / Agent 接入层</td>
+<td>OSDK（TS/Python/Java/OpenAPI）、Palantir MCP、AIP 工具</td>
+<td>让外部系统与 Agent 以受控方式读写本体</td>
+</tr>
+<tr>
+<td>⑤ 安全与治理层</td>
+<td>动态安全（对象级权限）、范围 Token、本体修改提案审批</td>
+<td><strong>横贯所有层</strong>，是 Palantir 的差异化壁垒</td>
+</tr>
+<tr>
+<td>⑥ 数据底座</td>
+<td>数据集 Dataset、虚拟表、模型（model）</td>
+<td>语义对象之下的事实来源</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13">1.3 关键产品特征</h3>
+<ul>
+<li><strong>对象是操作的主体，不是标签</strong>：Ontology 的对象承载业务身份（如「客户」「订单」「资产」），可被 Action 写回、被 Agent 操作，这是它与普通知识图谱最本质的区别。</li>
+<li><strong>动作可治理</strong>：所有对对象的写操作走 Action 提案 + 审批（proposal review），配合对象级权限与范围 Token，实现「谁能对哪个对象做什么」的细粒度控制。</li>
+<li><strong>数字孪生</strong>：Ontology 通过对象 + 链接把物理/业务世界镜像成可计算图，AIP 在此基础上提供 Agent 工具调用与推理。</li>
+</ul>
+<h3 id="14">1.4 定价模型与商业化模式</h3>
+<blockquote>
+<p>定价信息综合自 Palantir G-Cloud 14 公开报价文档、第三方采购分析平台（BD Emerson / CostBench / modern-datatools）及公开合同披露。Palantir 官方不公布标准价目表，以下为市场观察区间，非官方报价。</p>
+</blockquote>
+<p><strong>商业化形态</strong>：Palantir 采用 <strong>企业级定制报价（Custom Enterprise Pricing）</strong>，无公开标准价目。定价按「解决方案复杂度 × 数据规模 × 用户数」三维度逐单谈判，合同通常按年订阅（SaaS License + 实施服务）。</p>
+<p><strong>市场观察区间</strong>（2024–2026 公开合同与采购分析）：</p>
+<table>
+<thead>
+<tr>
+<th>档位</th>
+<th>年费量级</th>
+<th>典型客户画像</th>
+<th>包含内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>入门/单场景</td>
+<td>~$250K – $500K/年</td>
+<td>中型企业、单一用例试点</td>
+<td>Foundry 基础 + 单本体域 + 标准支持</td>
+</tr>
+<tr>
+<td>部门级</td>
+<td>~$500K – $1.5M/年</td>
+<td>大型企业单部门、多场景</td>
+<td>Foundry + AIP 接入 + 多本体域 + 实施服务</td>
+</tr>
+<tr>
+<td>企业级</td>
+<td>$1.5M – $5M+/年</td>
+<td>大型集团、跨部门部署</td>
+<td>全平台 + 定制开发 + 驻场工程师 + 高级治理</td>
+</tr>
+<tr>
+<td>政府/国防</td>
+<td>千万美元级合同</td>
+<td>政府机构、军方</td>
+<td>定制安全等级 + 私有部署 + 长期服务</td>
+</tr>
+</tbody>
+</table>
+<p><strong>成本结构特征</strong>：
+- <strong>License 订阅</strong>：按「数据量 + 用户席位 + 场景数」阶梯计价，是主要成本项。
+- <strong>实施服务</strong>：Palantir 部署通常捆绑 Forward Deployed Engineer（FDE）驻场服务，人天费率约 $2,000–$3,500，是隐性成本大头。
+- <strong>锁定效应</strong>：本体模型、Action 逻辑、数据血缘均沉淀在 Foundry 平台内，迁出成本高，续约议价能力弱。</p>
+<p><strong>与开源自建的成本对比</strong>：对中大型企业，Palantir 年费 ≈ 3–5 名高级工程师年薪的总拥有成本（TCO）；若企业已有数据平台团队且场景边界清晰，用开源组件自建语义层的 3 年 TCO 通常低于 Palantir 单年订阅费，但需自行承担语义建模与治理的工程化成本（见第三节难点分析）。</p>
+<p><strong>关键结论</strong>：Palantir 的定价模型决定了它更适合「数据基础薄弱、愿意用资金换时间」的大型组织；对已有数据工程能力、追求可控成本与数据主权的企业，「开源组件 + 自建本体层」是更优路径——这正是本报告第三、四节的重点。</p>
+<hr />
+<h2 id="github">二、开源的平替产品方案（开源 GitHub 仓库）有哪些</h2>
+<blockquote>
+<p>注意：没有任何单一开源项目是 Palantir Foundry 的 1:1 等价物。以下是按能力层对齐的<strong>评估性清单</strong>，用于说明「用开源组合能拼出本体论产品的哪些能力」。</p>
+</blockquote>
+<p><img alt="开源平替分层图谱" src="tmp_svg2png/fig2-open-source-landscape.png" /></p>
+<p>以下清单按能力层对齐，所有仓库均经 GitHub API / PyPI / Maven 实时核实（核实日期 2026-08-14），标注版本号、License、Star 数与集成复杂度评级。</p>
+<blockquote>
+<p>⚠️ <strong>存疑剔除</strong>：原清单中的 <code>Semantica</code>（时态上下文图）与 <code>AWS Semantic Layer Accelerator</code>（本体构建加速器）经 GitHub 全站检索未发现活跃开源仓库，已剔除。时态图能力由 <code>getzep/graphiti</code>（29.9K★）覆盖；语义层加速由 <code>databrickslabs/ontobricks</code>（Databricks Labs 官方）替代。</p>
+</blockquote>
+<h3 id="21-license-star">2.1 开源仓库核实清单（含版本 / License / Star / 集成复杂度）</h3>
+<table>
+<thead>
+<tr>
+<th>能力层</th>
+<th>仓库</th>
+<th>最新版本</th>
+<th>License</th>
+<th>Stars</th>
+<th>说明</th>
+<th>集成复杂度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图数据与查询</td>
+<td><a href="https://github.com/RDFLib/rdflib">RDFLib/rdflib</a></td>
+<td>7.6.0 (PyPI)</td>
+<td>BSD-3-Clause</td>
+<td>2.5K</td>
+<td>Python RDF 库，解析/序列化/SPARQL</td>
+<td>★☆☆ 低</td>
+</tr>
+<tr>
+<td>图数据与查询</td>
+<td><a href="https://github.com/apache/jena">apache/jena</a></td>
+<td>6.1.0 (Maven)</td>
+<td>Apache-2.0</td>
+<td>1.4K</td>
+<td>Java RDF/SPARQL 全栈框架</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>图数据与查询</td>
+<td><a href="https://github.com/oxigraph/oxigraph">oxigraph/oxigraph</a></td>
+<td>0.5.9 (npm)</td>
+<td>Apache-2.0</td>
+<td>1.8K</td>
+<td>Rust 高性能 SPARQL 图存储</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>图数据与查询</td>
+<td><a href="https://github.com/neo4j/neo4j">neo4j/neo4j</a></td>
+<td>2025.03.0</td>
+<td><strong>GPL-3.0</strong> ⚠️</td>
+<td>17.1K</td>
+<td>属性图数据库，商业使用需注意 GPL 传染性</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>约束验证 / 规则</td>
+<td><a href="https://github.com/RDFLib/pySHACL">RDFLib/pySHACL</a></td>
+<td>0.40.1 (PyPI)</td>
+<td>Apache-2.0</td>
+<td>339</td>
+<td>Python SHACL 形状约束校验</td>
+<td>★☆☆ 低</td>
+</tr>
+<tr>
+<td>约束验证 / 规则</td>
+<td><a href="https://github.com/TopQuadrant/shacl">TopQuadrant/shacl</a></td>
+<td>1.5.0</td>
+<td>Apache-2.0</td>
+<td>244</td>
+<td>Java SHACL API（TopBraid 内核开源版）</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>时态上下文图</td>
+<td><a href="https://github.com/getzep/graphiti">getzep/graphiti</a></td>
+<td>0.29.3 (PyPI)</td>
+<td>Apache-2.0</td>
+<td><strong>29.9K</strong></td>
+<td>时态知识图谱，事实/关系随时间演化，LLM 原生</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>本体增强检索</td>
+<td><a href="https://github.com/microsoft/graphrag">microsoft/graphrag</a></td>
+<td>3.1.1 (PyPI)</td>
+<td>MIT</td>
+<td><strong>35.5K</strong></td>
+<td>微软 GraphRAG，图结构增强 RAG</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>本体增强检索</td>
+<td><a href="https://github.com/microsoft/ograg2">microsoft/ograg2</a></td>
+<td>-</td>
+<td>MIT</td>
+<td>136</td>
+<td>微软 OGRAG（Ontology-Grounded RAG）发布版</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>本体增强检索</td>
+<td><a href="https://github.com/texttron/hyde">texttron/hyde</a></td>
+<td>-</td>
+<td>无（研究代码）</td>
+<td>583</td>
+<td>HyDE 假设文档嵌入检索方法</td>
+<td>★☆☆ 低</td>
+</tr>
+<tr>
+<td>Text2Cypher</td>
+<td><a href="https://github.com/neo4j-labs/text2cypher">neo4j-labs/text2cypher</a></td>
+<td>-</td>
+<td>CC0-1.0</td>
+<td>242</td>
+<td>自然语言转 Cypher 数据集与微调指令</td>
+<td>★☆☆ 低</td>
+</tr>
+<tr>
+<td>本体构建加速器</td>
+<td><a href="https://github.com/owlcs/owlapi">owlcs/owlapi</a></td>
+<td>5.5.1 (Maven)</td>
+<td>Apache-2.0 / LGPL</td>
+<td>921</td>
+<td>Java OWL 2 本体构建/解析 API</td>
+<td>★★☆ 中</td>
+</tr>
+<tr>
+<td>本体构建加速器</td>
+<td><a href="https://github.com/databrickslabs/ontobricks">databrickslabs/ontobricks</a></td>
+<td>-</td>
+<td>NOASSERTION ⚠️</td>
+<td>273</td>
+<td>Databricks Labs 官方：Unity Catalog → 物化知识图谱 + MCP 工具暴露</td>
+<td>★★☆ 中</td>
+</tr>
+</tbody>
+</table>
+<p><strong>集成复杂度评级说明</strong>：★☆☆ 低（pip/maven 安装即用，API 稳定）｜★★☆ 中（需配置存储/索引，有一定学习曲线）｜★★★ 高（需深度定制或二次开发）。</p>
+<h3 id="22-license">2.2 License 风险提示（商业使用必读）</h3>
+<ul>
+<li><strong>Neo4j Community Edition 采用 GPL-3.0</strong>：若将 Neo4j 作为数据库嵌入商业产品分发，需开源整个衍生作品；企业商用建议购买 Neo4j Enterprise 商业许可，或改用 Apache-2.0 的 Oxigraph / 属性图替代方案（如 Memgraph、AgensGraph）。</li>
+<li><strong>texttron/hyde 无标准 License</strong>：研究代码未附带开源协议，商业使用前需联系作者确认授权。</li>
+<li><strong>databrickslabs/ontobricks License 为 NOASSERTION</strong>：GitHub 无法自动识别其协议，需人工核查 <code>LICENSE</code> 文件确认商用条款（Databricks Labs 项目通常采用 Databricks License）。</li>
+<li>其余仓库均为宽松协议（MIT / Apache-2.0 / BSD-3 / CC0），可安全商用。</li>
+</ul>
+<h3 id="23">2.3 开源组合的边界（重要）</h3>
+<p>调研结论明确：开源工具<strong>能覆盖</strong>「图存储、约束校验、检索增强、本体构建」等能力层，但<strong>难以覆盖</strong> Palantir 的三个护城河：</p>
+<ol>
+<li><strong>一体化操作型本体</strong>（对象 + Action 写回 + 动态安全的紧耦合）；</li>
+<li><strong>企业级治理与权限</strong>（对象级安全、审批流、审计的深度集成）；</li>
+<li><strong>平台级工程化</strong>（数据集版本化、血缘、多租户、可观测）。</li>
+</ol>
+<p>因此「开源平替」的正确姿态是：<strong>用开源组件自建一个满足自身场景的语义层 + 操作层</strong>，而非寻找等价替代品。</p>
+<hr />
+<h2 id="_2">三、企业如何构建本体论产品：技术难点与对应方案</h2>
+<h3 id="31">3.1 六层参考架构</h3>
+<p><img alt="企业构建参考架构" src="tmp_svg2png/fig3-enterprise-architecture.png" /></p>
+<h4 id="_3">数据流全景</h4>
+<p>下图展示 Ontology 从数据源到业务应用的完整数据流，涵盖六层架构之间的数据流向、Action 写回闭环、安全治理横贯、以及审计追溯：</p>
+<p><img alt="Ontology 数据流" src="prototype/prototype-near/out/ontology-dataflow.gif" /></p>
+<p><strong>数据流解读</strong>：</p>
+<ul>
+<li><strong>正向链路</strong>：数据源 → 数据接入（Schema 映射）→ 语义建模（对象+链接+属性）→ 图存储+向量索引 → 逻辑与动作（混合检索）→ Action 写回 / Agent 接入 → 业务应用。</li>
+<li><strong>闭环链路</strong>：Action 写回通过事务机制将变更同步回图存储，形成本体数据的自更新闭环；业务应用的反馈通过 Agent 回传至逻辑层。</li>
+<li><strong>横贯治理</strong>：安全治理层向下覆盖语义建模（对象级权限）、Action 写回（范围 Token）、Agent 接入（工具白名单），确保每一层的数据操作都在受控范围内。</li>
+<li><strong>审计追溯</strong>：Action 写回与 Agent 操作均产生审计日志和证据链，形成全链路可追溯的合规记录。</li>
+</ul>
+<h3 id="32">3.2 逐层技术难点与对应方案（含具体开源工具锚点）</h3>
+<table>
+<thead>
+<tr>
+<th>架构层</th>
+<th>技术难点</th>
+<th>对应技术方案</th>
+<th>推荐开源工具（锚点）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L1 数据接入层</strong></td>
+<td>源系统语义不一致、口径漂移、脏数据污染本体</td>
+<td>湖仓一体 + 数据血缘；版本化数据集；schema 契约（Schema Contract）</td>
+<td>Apache Iceberg / Delta Lake（版本化数据集）、OpenLineage（血缘）、Great Expectations（数据契约校验）</td>
+</tr>
+<tr>
+<td><strong>L2 语义建模层</strong></td>
+<td>领域术语不统一、关系建模复杂、变更演进难</td>
+<td>RDF/OWL 建模 + SHACL 约束校验；领域专家低代码协同；本体版本控制（ontology-as-code）</td>
+<td><a href="https://github.com/owlcs/owlapi">owlcs/owlapi</a> 5.5.1（OWL 2 构建）、<a href="https://github.com/RDFLib/rdflib">RDFLib/rdflib</a> 7.6.0（RDF 解析）、<a href="https://github.com/RDFLib/pySHACL">RDFLib/pySHACL</a> 0.40.1（SHACL 校验）、WebProtégé（协同建模）</td>
+</tr>
+<tr>
+<td><strong>L3 存储与查询层</strong></td>
+<td>大规模图遍历慢、复杂推理代价高、召回精度不足</td>
+<td>图数据库 + 向量索引双引擎；混合检索（图遍历 + 语义相似度）；增量推理物化</td>
+<td><a href="https://github.com/oxigraph/oxigraph">oxigraph/oxigraph</a> 0.5.9（SPARQL 图存储）、<a href="https://github.com/neo4j/neo4j">neo4j/neo4j</a> 2025.03（属性图，⚠️ GPL-3.0）、Qdrant / Milvus（向量索引）、<a href="https://github.com/apache/jena">apache/jena</a> 6.1.0（推理机）</td>
+</tr>
+<tr>
+<td><strong>L4 逻辑与动作层</strong></td>
+<td>写回事务一致性、规则编排、幂等与回滚</td>
+<td>Action 提案 + 审批流；规则引擎 + 幂等设计；函数服务编排</td>
+<td>自研 Action 层（参照 Palantir Action 模式）、Drools（规则引擎）、Temporal（工作流编排 + 幂等保障）</td>
+</tr>
+<tr>
+<td><strong>L5 安全治理层</strong></td>
+<td>对象级权限、审计追溯、合规红线</td>
+<td>最小权限 + 范围 Token；审批流 + 审计日志；数据血缘合规</td>
+<td>Open Policy Agent (OPA)（策略即代码）、Apache Ranger（细粒度权限）、Marquez（数据血缘）</td>
+</tr>
+<tr>
+<td><strong>L6 Agent 接入层</strong></td>
+<td>Agent 越权、幻觉、不可追溯、工具滥用</td>
+<td>只读默认 + 工具白名单；证据链 + 上下文治理；可观测运行时</td>
+<td>MCP Server 自封装（工具白名单）、<a href="https://github.com/getzep/graphiti">getzep/graphiti</a> 0.29.3（时态上下文记忆）、Langfuse / OpenTelemetry（可观测）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33">3.3 五个最关键的技术难点（聚焦 + 优先级排序）</h3>
+<p>按「风险敞口 × 实施成本」两维度排序，P0 = 必须在架构设计期解决，P1 = 需在 MVP 阶段解决，P2 = 可在迭代中完善：</p>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>难点</th>
+<th>风险敞口</th>
+<th>实施成本</th>
+<th>方案要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0</strong></td>
+<td>① 语义建模成本</td>
+<td>高（本体质量决定一切上层能力）</td>
+<td>高（人力密集）</td>
+<td>本体建模工程化（OWL/RDF + SHACL 约束）、领域专家低代码协同、ontology-as-code 版本控制；<strong>用 <a href="https://github.com/microsoft/ograg2">microsoft/ograg2</a> 的本体引导建模思路加速初始建模</strong></td>
+</tr>
+<tr>
+<td><strong>P0</strong></td>
+<td>③ 受控写回（Action 一致性）</td>
+<td>高（写操作直接改业务数据，出错即事故）</td>
+<td>中高</td>
+<td>Action 提案 + 审批流 + 幂等设计 + 事务边界；<strong>参照 Temporal 的 Saga 模式做补偿回滚</strong></td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>④ 对象级安全与治理</td>
+<td>高（权限失控 = 数据泄露）</td>
+<td>中</td>
+<td>范围 Token + 最小权限 + 全链路审计；<strong>OPA 策略即代码实现对象级权限</strong></td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>⑤ Agent 可治理接入</td>
+<td>高（幻觉 + 越权是 Agent 最大风险）</td>
+<td>中</td>
+<td>只读默认、工具白名单、证据链约束、可观测运行时；<strong><a href="https://github.com/microsoft/graphrag">microsoft/graphrag</a> 3.1.1 的社区摘要 + 证据链可作为 Agent 上下文约束</strong></td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>② 图与向量的混合检索</td>
+<td>中（影响召回质量，不直接影响安全）</td>
+<td>中</td>
+<td>GraphRAG 式「图结构 + 向量索引」混合召回，按本体关系做多跳扩展；<strong><a href="https://github.com/getzep/graphiti">getzep/graphiti</a> 0.29.3 已内建时态 + 图 + 向量混合</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>落地顺序建议</strong>：先解决 P0 的语义建模与写回一致性（这是本体的「地基」），再叠加 P1 的安全与 Agent 治理（这是「围墙」），最后优化 P2 的检索质量（这是「体验」）。跳过 P0 直接做 P2 是本体型项目最常见的失败模式。</p>
+<hr />
+<h2 id="_4">四、本体论产品如何在不同的项目下实现可迁移复制</h2>
+<p><img alt="可迁移复制机制" src="tmp_svg2png/fig4-transferable-ontology.png" /></p>
+<h3 id="41">4.1 核心思想</h3>
+<p>可迁移的关键是：<strong>将「本体 + 逻辑 + 治理 + 评测」封装为版本化、可参数化的资产包（ontology-as-code），通过 Git 版本管理，在目标项目中「实例化」而非「复制代码」</strong>。</p>
+<h3 id="42">4.2 四个迁移维度</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>迁移方式</th>
+<th>关键动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 本体层复用</td>
+<td>复用本体 Schema（OWL + SHACL 形状）</td>
+<td>换命名空间、术语重映射到目标领域词汇</td>
+</tr>
+<tr>
+<td>② 工具 / 动作重绑定</td>
+<td>复用 Action 提案与 Function 契约</td>
+<td>重新绑定目标项目的数据源 / API</td>
+</tr>
+<tr>
+<td>③ 治理层复用</td>
+<td>复用权限模板、审批规则、审计规范</td>
+<td>按目标组织架构重配角色</td>
+</tr>
+<tr>
+<td>④ 评测 / 证据复跑</td>
+<td>复用离线评测集 + 指标</td>
+<td>在新数据上重跑回归，验证迁移有效性</td>
+</tr>
+</tbody>
+</table>
+<h3 id="43">4.3 落地方法论（三步，含具体动作与周期估算）</h3>
+<p><strong>Step 1：资产化（Assetization）</strong> — 把本体从「项目代码」变成「可复用资产」</p>
+<table>
+<thead>
+<tr>
+<th>动作</th>
+<th>产出物</th>
+<th>工具建议</th>
+<th>周期估算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本体 Schema 代码化</td>
+<td><code>.owl</code> / <code>.ttl</code> 文件 + SHACL 形状文件</td>
+<td>owlapi / rdflib 生成，Git 版本控制</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>Action 契约抽象</td>
+<td>Action 接口定义（JSON Schema）+ 审批流配置</td>
+<td>自研 Action 层，参照 Palantir Action 模式</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>Function 逻辑封装</td>
+<td>独立可部署的函数包（Docker 镜像或 WASM）</td>
+<td>Temporal workflow / 独立微服务</td>
+<td>2–3 周</td>
+</tr>
+<tr>
+<td>权限模板提取</td>
+<td>OPA Rego 策略文件 + 角色矩阵 YAML</td>
+<td>Open Policy Agent</td>
+<td>1 周</td>
+</tr>
+<tr>
+<td>评测集固化</td>
+<td>离线评测集（问题-答案对）+ 指标脚本</td>
+<td>自研评测框架，参照 GraphRAG 评测方法</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td><strong>小计</strong></td>
+<td><strong>本体资产包 v1.0（Git 仓库）</strong></td>
+<td>—</td>
+<td><strong>6–10 周（1.5–2.5 月）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 2：参数化（Parameterization）</strong> — 把项目耦合点抽象为可配置参数</p>
+<table>
+<thead>
+<tr>
+<th>动作</th>
+<th>产出物</th>
+<th>关键决策</th>
+<th>周期估算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据源地址抽象</td>
+<td><code>config/datasources.yaml</code></td>
+<td>统一连接器接口（JDBC / REST / 文件）</td>
+<td>1 周</td>
+</tr>
+<tr>
+<td>术语映射表抽取</td>
+<td><code>config/terminology-map.yaml</code>（源领域 ↔ 目标领域词汇对照）</td>
+<td>需领域专家参与评审</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>角色矩阵参数化</td>
+<td><code>config/roles.yaml</code></td>
+<td>对齐目标组织架构</td>
+<td>0.5 周</td>
+</tr>
+<tr>
+<td>API 端点抽象</td>
+<td><code>config/endpoints.yaml</code></td>
+<td>网关统一路由</td>
+<td>0.5 周</td>
+</tr>
+<tr>
+<td>环境隔离</td>
+<td><code>env/{dev,staging,prod}.yaml</code></td>
+<td>敏感配置走 Vault / KMS</td>
+<td>1 周</td>
+</tr>
+<tr>
+<td><strong>小计</strong></td>
+<td><strong>参数化配置文件组</strong></td>
+<td>—</td>
+<td><strong>4–6 周（1–1.5 月）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 3：实例化 + 回归（Instantiation + Regression）</strong> — 在目标项目中落地并验证</p>
+<table>
+<thead>
+<tr>
+<th>动作</th>
+<th>验收标准</th>
+<th>周期估算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>导入资产包 + 注入参数</td>
+<td>本体 Schema 在目标环境成功加载，SHACL 校验通过</td>
+<td>1 周</td>
+</tr>
+<tr>
+<td>重绑定数据源 / 工具</td>
+<td>所有 Action 能正确读写目标系统</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>术语重映射</td>
+<td>领域专家评审通过术语一致性</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>离线评测回归</td>
+<td>核心指标（召回率 / 准确率 / 一致性）不低于源项目基线的 90%</td>
+<td>1–2 周</td>
+</tr>
+<tr>
+<td>安全合规审查</td>
+<td>权限矩阵 + 审计日志通过安全团队评审</td>
+<td>1 周</td>
+</tr>
+<tr>
+<td><strong>小计</strong></td>
+<td><strong>目标项目上线就绪</strong></td>
+<td><strong>5–8 周（1.2–2 月）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>总迁移周期估算</strong>：<strong>15–24 周（约 4–6 个月）</strong>，其中资产化是一次性投入（首次最慢），后续项目迁移可复用已有资产包，周期压缩至 <strong>8–14 周（2–3.5 个月）</strong>。</p>
+<h3 id="44">4.4 迁移成本构成（人力估算）</h3>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>首次资产化</th>
+<th>后续项目迁移</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本体工程师（OWL/RDF/SHACL）</td>
+<td>1 人 × 2.5 月</td>
+<td>1 人 × 1 月</td>
+<td>核心稀缺角色</td>
+</tr>
+<tr>
+<td>后端工程师（Action/Function）</td>
+<td>1 人 × 2 月</td>
+<td>1 人 × 1 月</td>
+<td>Action 层开发</td>
+</tr>
+<tr>
+<td>数据工程师（接入/血缘）</td>
+<td>1 人 × 1.5 月</td>
+<td>1 人 × 0.5 月</td>
+<td>数据源重绑定</td>
+</tr>
+<tr>
+<td>领域专家（术语评审）</td>
+<td>0.5 人 × 1 月</td>
+<td>0.5 人 × 0.5 月</td>
+<td>业务侧投入</td>
+</tr>
+<tr>
+<td>安全/合规（权限审计）</td>
+<td>0.5 人 × 0.5 月</td>
+<td>0.5 人 × 0.5 月</td>
+<td>治理审查</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>~8 人月</strong></td>
+<td><strong>~4.5 人月</strong></td>
+<td>后续迁移成本 ≈ 首次的 55%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45">4.5 迁移反模式（必须避免）</h3>
+<ol>
+<li><strong>复制粘贴式迁移</strong>：直接复制源项目代码到目标项目，改命名空间了事。后果：术语不一致、业务规则错位、治理失效。<strong>正确做法</strong>：走「资产化 → 参数化 → 实例化」三步，代码不变、参数变。</li>
+<li><strong>跳过评测直接上线</strong>：没有离线评测集做回归验证，迁移后语义漂移无法发现。后果：上线后召回率/准确率下降，业务侧信任崩塌。<strong>正确做法</strong>：评测集是迁移的「验收门禁」，不达标不上线。</li>
+<li><strong>术语硬编码</strong>：把领域术语写死在本体代码里，迁移时要改代码。后果：每次迁移都是一次「代码手术」，版本失控。<strong>正确做法</strong>：术语走 <code>terminology-map.yaml</code> 参数化，本体结构保持领域无关。</li>
+<li><strong>治理后置</strong>：先把本体跑起来，权限和审批「后面再补」。后果：安全审计不通过，返工成本远高于前置设计。<strong>正确做法</strong>：治理（权限模板 + 审批流 + 审计）随资产包一起迁移，不允许「先上车后补票」。</li>
+<li><strong>忽视 License 风险</strong>：在商用产品中嵌入 GPL-3.0 的 Neo4j CE 作为分发组件。后果：法律合规风险，可能被要求开源整个产品。<strong>正确做法</strong>：商用场景选 Apache-2.0/MIT/BSD 协议的组件（Oxigraph、Graphiti、GraphRAG），或购买商业许可。</li>
+</ol>
+<h3 id="46">4.6 可迁移性成立的前提</h3>
+<ul>
+<li><strong>本体的「领域无关骨架」与「领域相关术语」分离</strong>：骨架（对象-属性-链接-动作的元模型）可跨项目复用，术语层按项目重映射。</li>
+<li><strong>治理与逻辑解耦</strong>：审批流、权限、Action 提案这些治理机制是通用的，可随资产包迁移；业务规则按项目注入。</li>
+<li><strong>评测先行</strong>：没有离线评测集，迁移就成了「盲改」。评测集是迁移质量的唯一客观标尺。</li>
+</ul>
+<hr />
+<h2 id="oag-prototype">五、原型验证：OAG Prototype 的能力覆盖与缺口</h2>
+<blockquote>
+<p>本章基于本仓库 <code>prototype/</code> 目录的实际构建成果，验证第三节六层架构中哪些层已被原型覆盖、哪些层尚待补全。原型为纯静态前端（可部署 Vercel），融合 <code>prototype-cursor</code>（操作闭环：提案/审批/四权/RAG对照）与 <code>prototype-near</code>（多场景图检索）两套能力。</p>
+</blockquote>
+<h3 id="51">5.1 原型场景清单</h3>
+<p>原型内置 4 个业务场景，每个场景包含独立的本体子图（对象 + 链接 + 属性 + 关系关键词 + 属性映射）：</p>
+<table>
+<thead>
+<tr>
+<th>场景 ID</th>
+<th>业务域</th>
+<th>节点数</th>
+<th>边数</th>
+<th>对象类型数</th>
+<th>验证目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bank-aml</code></td>
+<td>银行反洗钱</td>
+<td>20</td>
+<td>18</td>
+<td>5</td>
+<td>Action Proposal 审批写回（发放待审核 + 反洗钱拦截）</td>
+</tr>
+<tr>
+<td><code>power-grid</code></td>
+<td>能源知识大脑</td>
+<td>17</td>
+<td>15</td>
+<td>5</td>
+<td>知识检索 + 多跳推理（设备 → 故障 → 预案）</td>
+</tr>
+<tr>
+<td><code>supply-chain</code></td>
+<td>制造供应链</td>
+<td>14</td>
+<td>19</td>
+<td>4</td>
+<td>供应链图遍历（订单 → 物料 → 供应商 → 风险）</td>
+</tr>
+<tr>
+<td><code>workshop</code></td>
+<td>机加一线（夜班温升）</td>
+<td>5</td>
+<td>6</td>
+<td>3</td>
+<td>实时告警 + Action 触发（温度阈值 → 工单派发）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52">5.2 六层架构覆盖度评估</h3>
+<table>
+<thead>
+<tr>
+<th>架构层</th>
+<th>原型覆盖状态</th>
+<th>已实现能力</th>
+<th>缺口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>L1 数据接入层</strong></td>
+<td>❌ 未覆盖</td>
+<td>—</td>
+<td>原型使用预置 JSON 数据，未接入真实数据源；无 Schema 契约、无血缘</td>
+</tr>
+<tr>
+<td><strong>L2 语义建模层</strong></td>
+<td>✅ 已覆盖</td>
+<td>对象/链接/属性的图结构定义；<code>propMap</code>（属性映射）；<code>relKeywords</code>（关系关键词，用于自然语言匹配）</td>
+<td>无 OWL/SHACL 形式化约束，建模靠前端 JSON 硬编码</td>
+</tr>
+<tr>
+<td><strong>L3 存储与查询层</strong></td>
+<td>✅ 已覆盖</td>
+<td>力导向图谱可视化；实体识别（从自然语言问题中抽取实体）；两跳图检索</td>
+<td>无持久化图存储（内存态）；无向量索引，混合检索未实现</td>
+</tr>
+<tr>
+<td><strong>L4 逻辑与动作层</strong></td>
+<td>✅ 已覆盖</td>
+<td><strong>Action Proposal 提案 + 审批写回</strong>（原型核心亮点）；审批流模拟</td>
+<td>无真实事务，写回仅前端状态变更；无幂等/回滚机制</td>
+</tr>
+<tr>
+<td><strong>L5 安全治理层</strong></td>
+<td>⚠️ 部分覆盖</td>
+<td><strong>四权矩阵</strong>（查看/操作/审批/管理四级权限展示）；Context Pack（上下文打包）</td>
+<td>权限仅前端展示，无真实鉴权；无审计日志</td>
+</tr>
+<tr>
+<td><strong>L6 Agent 接入层</strong></td>
+<td>⚠️ 部分覆盖</td>
+<td>本体 / OAG / 对照三视图切换（验证 OAG 检索 vs 纯 RAG 的差异）；示例问题芯片</td>
+<td>无真实 LLM 接入；无工具白名单、无证据链</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53">5.3 原型验证结论</h3>
+<ol>
+<li><strong>已验证可行</strong>：L2（语义建模）+ L3（图检索）+ L4（Action 审批）三层的最小闭环已跑通，证明「本体 + 检索 + 受控写回」的核心链路在工程上可实现。</li>
+<li><strong>三视图对照验证了 OAG 价值</strong>：<code>bank-aml</code> 场景的本体视图 vs OAG 视图 vs 纯 RAG 对照视图，直观展示了本体引导的检索（OAG）在多跳关系问题上的召回优势。</li>
+<li><strong>四权矩阵验证了治理可设计</strong>：查看/操作/审批/管理四级权限的矩阵化表达，证明对象级权限模型可以在前端层面被清晰设计与展示。</li>
+<li><strong>关键缺口</strong>：L1（真实数据接入）、L5（真实鉴权与审计）、L6（真实 LLM Agent 接入）三层仍是原型空白，需要从「前端模拟」走向「后端真实实现」。</li>
+</ol>
+<h3 id="54">5.4 下一步行动建议（原型 → 产品化）</h3>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>行动</th>
+<th>对应架构层</th>
+<th>目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0</td>
+<td>将 <code>bank-aml</code> 场景的 Action Proposal 接入真实后端（含事务 + 幂等）</td>
+<td>L4</td>
+<td>验证受控写回的工程可行性</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>为 <code>power-grid</code> 场景接入真实数据源（替换预置 JSON）</td>
+<td>L1</td>
+<td>验证数据接入与 Schema 契约</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>用 Oxigraph 替换内存态图存储，实现持久化 + SPARQL 查询</td>
+<td>L3</td>
+<td>验证图存储的工程化</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>用 OPA 实现四权矩阵的真实鉴权（替换前端模拟）</td>
+<td>L5</td>
+<td>验证对象级权限</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>接入 LLM（MCP Server + 工具白名单），实现 <code>workshop</code> 场景的 Agent 告警 → 工单闭环</td>
+<td>L6</td>
+<td>验证 Agent 可治理接入</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>用 Graphiti 为 <code>supply-chain</code> 场景加时态维度（供应商风险随时间演化）</td>
+<td>L3</td>
+<td>验证时态知识图谱</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_5">附：资料来源</h2>
+<h3 id="_6">仓库内部材料</h3>
+<p>本报告结论来自 <code>oag-deep-research</code> 仓库以下核心材料：</p>
+<ul>
+<li><code>research/02-palantir-ontology-platform/DEEP_RESEARCH.md</code> — Palantir Ontology 平台模型深度研究</li>
+<li><code>research/02-palantir-ontology-platform/deliverables/palantir-product-shape-and-user-workflows.md</code> — 产品形态与员工工作流</li>
+<li><code>research/02-palantir-ontology-platform/deliverables/palantir-ontology-oag-expanded-research.md</code> — 扩展研究与可迁移架构</li>
+<li><code>research/06-evaluation-selection-and-case-studies/deliverables/ontology-open-source-tool-landscape.md</code> — 开源工具静态评估</li>
+<li><code>research/06-evaluation-selection-and-case-studies/deliverables/enterprise-ontology-and-tooling-roadmap.md</code> — 企业落地路线</li>
+<li><code>.conclusions/palantir-ontology-research-expansion.md</code> — 维护摘要</li>
+<li><code>prototype/README.md</code> + <code>prototype/scenes/*.json</code> — OAG 融合原型（4 场景本体子图与能力清单）</li>
+</ul>
+<h3 id="_7">外部引用</h3>
+<p><strong>Palantir 官方与定价</strong>：
+- Palantir Foundry Plans（官方产品页）— https://www.palantir.com/platforms/foundry/plans/
+- Palantir Platform: Foundry &amp; AIP Pricing Document（G-Cloud 14 公开报价）— UK Government Digital Marketplace
+- BD Emerson: What Palantir Costs（企业采购成本分析）— https://www.bdemerson.com/article/palantir-cost
+- CostBench: Palantir AIP Pricing 2026（定制报价分析）— https://costbench.com/software/ai-ml-platforms/palantir-aip/</p>
+<p><strong>开源仓库（版本/License/Star 核实日期：2026-08-14，来源 GitHub API / PyPI / Maven Central）</strong>：
+- RDFLib/rdflib 7.6.0 — https://github.com/RDFLib/rdflib ｜ BSD-3-Clause
+- apache/jena 6.1.0 — https://github.com/apache/jena ｜ Apache-2.0
+- oxigraph/oxigraph 0.5.9 — https://github.com/oxigraph/oxigraph ｜ Apache-2.0
+- neo4j/neo4j 2025.03.0 — https://github.com/neo4j/neo4j ｜ GPL-3.0（商用注意）
+- RDFLib/pySHACL 0.40.1 — https://github.com/RDFLib/pySHACL ｜ Apache-2.0
+- TopQuadrant/shacl 1.5.0 — https://github.com/TopQuadrant/shacl ｜ Apache-2.0
+- getzep/graphiti 0.29.3 — https://github.com/getzep/graphiti ｜ Apache-2.0
+- microsoft/graphrag 3.1.1 — https://github.com/microsoft/graphrag ｜ MIT
+- microsoft/ograg2 — https://github.com/microsoft/ograg2 ｜ MIT
+- texttron/hyde — https://github.com/texttron/hyde ｜ 无标准 License（研究代码）
+- neo4j-labs/text2cypher — https://github.com/neo4j-labs/text2cypher ｜ CC0-1.0
+- owlcs/owlapi 5.5.1 — https://github.com/owlcs/owlapi ｜ Apache-2.0 / LGPL
+- databrickslabs/ontobricks — https://github.com/databrickslabs/ontobricks ｜ NOASSERTION（需人工核查）
+- OWL API 官方文档 — http://owlcs.github.io/owlapi/</p>
+</body>
+</html>
