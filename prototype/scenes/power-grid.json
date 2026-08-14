@@ -1,0 +1,71 @@
+{
+  "id": "power-grid",
+  "name": "知识大脑（能源类）",
+  "desc": "电网设备-缺陷-检修工单-停电-台区-客户 本体（能源类企业文档知识库缩影）",
+  "types": {
+    "Substation": {"label": "变电站", "color": "#2563eb"},
+    "Device": {"label": "一次设备", "color": "#7c3aed"},
+    "Defect": {"label": "缺陷", "color": "#ef4444"},
+    "WorkOrder": {"label": "检修工单", "color": "#f59e0b"},
+    "Outage": {"label": "停电事件", "color": "#dc2626"},
+    "Feeder": {"label": "台区/馈线", "color": "#16a34a"},
+    "Customer": {"label": "用电客户", "color": "#0ea5e9"},
+    "Team": {"label": "检修班组", "color": "#64748b"}
+  },
+  "relKeywords": {
+    "equipAt": ["位于", "所属", "在哪个变电站", "安装", "equip", "站内"],
+    "hasDefect": ["缺陷", "故障", "异常", "defect", "隐患"],
+    "triggers": ["触发", "导致工单", "生成工单", "由什么触发", "triggers"],
+    "assignedTo": ["指派", "派给", "谁处理", "班组", "负责", "assigned"],
+    "serves": ["供电", "服务", "供电子", "馈电", "serves"],
+    "causes": ["停电", "导致停电", "导致", "后果", "跳闸", "causes", "outage"],
+    "severity": ["严重程度", "几级", "severity", "等级"],
+    "voltage": ["电压", "千伏", "kv", "voltage", "多少伏"],
+    "location": ["在哪", "位于", "位置", "区域", "location"],
+    "health": ["健康度", "健康", "状态评分", "health"]
+  },
+  "propMap": {
+    "severity": [["severity"], "严重程度"],
+    "voltage": [["voltageLevel"], "电压等级"],
+    "location": [["region", "city"], "位置"],
+    "health": [["healthScore"], "健康度"],
+    "status": [["status"], "状态"],
+    "priority": [["priority"], "优先级"]
+  },
+  "nodes": [
+    {"id": "SUB-01", "type": "Substation", "name": "珠江500kV变电站", "props": {"voltageLevel": "500kV", "region": "广州", "inService": 2010}},
+    {"id": "SUB-02", "type": "Substation", "name": "前海220kV变电站", "props": {"voltageLevel": "220kV", "region": "深圳", "inService": 2015}},
+    {"id": "DEV-01", "type": "Device", "name": "1号主变", "props": {"deviceType": "电力变压器", "manufacturer": "特变电工", "healthScore": 87, "installDate": "2016-05"}},
+    {"id": "DEV-02", "type": "Device", "name": "2号主变", "props": {"deviceType": "电力变压器", "manufacturer": "保变电气", "healthScore": 92, "installDate": "2018-11"}},
+    {"id": "DEV-03", "type": "Device", "name": "220kV断路器CB-201", "props": {"deviceType": "SF6断路器", "manufacturer": "平高电气", "healthScore": 76, "installDate": "2015-09"}},
+    {"id": "DEV-04", "type": "Device", "name": "GIS组合电器G-01", "props": {"deviceType": "GIS", "manufacturer": "新东北电气", "healthScore": 81, "installDate": "2017-03"}},
+    {"id": "DEF-01", "type": "Defect", "name": "主变油温异常", "props": {"severity": "严重", "defectType": "过热", "foundDate": "2026-08-10", "foundBy": "巡检机器人"}},
+    {"id": "DEF-02", "type": "Defect", "name": "断路器SF6气压偏低", "props": {"severity": "一般", "defectType": "气压异常", "foundDate": "2026-08-12", "foundBy": "在线监测"}},
+    {"id": "WO-01", "type": "WorkOrder", "name": "工单GZ-2026-0881", "props": {"status": "待处理", "priority": "高", "workType": "消缺", "createdDate": "2026-08-11"}},
+    {"id": "WO-02", "type": "WorkOrder", "name": "工单SZ-2026-1142", "props": {"status": "处理中", "priority": "中", "workType": "检修", "createdDate": "2026-08-13"}},
+    {"id": "OUT-01", "type": "Outage", "name": "珠江站10kV馈线跳闸", "props": {"duration": "32分钟", "affectedCustomers": 1450, "startTime": "2026-08-10 14:20", "cause": "主变过热保护动作"}},
+    {"id": "FE-01", "type": "Feeder", "name": "10kV工业园甲线", "props": {"voltageLevel": "10kV", "region": "广州", "loadRate": "78%"}},
+    {"id": "FE-02", "type": "Feeder", "name": "10kV前海湾乙线", "props": {"voltageLevel": "10kV", "region": "深圳", "loadRate": "65%"}},
+    {"id": "CUST-01", "type": "Customer", "name": "广汽新能源工厂", "props": {"customerType": "大工业", "industry": "新能源汽车", "annualLoad": "12000万kWh"}},
+    {"id": "CUST-02", "type": "Customer", "name": "前海数据中心", "props": {"customerType": "重要客户", "industry": "算力中心", "annualLoad": "8000万kWh"}},
+    {"id": "TEAM-01", "type": "Team", "name": "变电检修一班", "props": {"members": 8, "base": "广州", "specialty": "一次设备"}},
+    {"id": "TEAM-02", "type": "Team", "name": "变电检修二班", "props": {"members": 6, "base": "深圳", "specialty": "断路器/GIS"}}
+  ],
+  "edges": [
+    {"source": "DEV-01", "target": "SUB-01", "rel": "equipAt", "label": "位于"},
+    {"source": "DEV-02", "target": "SUB-01", "rel": "equipAt", "label": "位于"},
+    {"source": "DEV-03", "target": "SUB-02", "rel": "equipAt", "label": "位于"},
+    {"source": "DEV-04", "target": "SUB-02", "rel": "equipAt", "label": "位于"},
+    {"source": "DEV-01", "target": "DEF-01", "rel": "hasDefect", "label": "存在缺陷"},
+    {"source": "DEV-03", "target": "DEF-02", "rel": "hasDefect", "label": "存在缺陷"},
+    {"source": "DEF-01", "target": "WO-01", "rel": "triggers", "label": "触发"},
+    {"source": "DEF-02", "target": "WO-02", "rel": "triggers", "label": "触发"},
+    {"source": "WO-01", "target": "TEAM-01", "rel": "assignedTo", "label": "指派给"},
+    {"source": "WO-02", "target": "TEAM-02", "rel": "assignedTo", "label": "指派给"},
+    {"source": "FE-01", "target": "CUST-01", "rel": "serves", "label": "供电给"},
+    {"source": "FE-02", "target": "CUST-02", "rel": "serves", "label": "供电给"},
+    {"source": "SUB-01", "target": "FE-01", "rel": "serves", "label": "馈电给"},
+    {"source": "SUB-02", "target": "FE-02", "rel": "serves", "label": "馈电给"},
+    {"source": "DEF-01", "target": "OUT-01", "rel": "causes", "label": "导致"}
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "workshop",
+  "name": "机加一线",
+  "desc": "设备-异常-工单-零件-班组 运营本体（夜班主轴温升）",
+  "types": {
+    "Equipment": { "label": "设备", "color": "#3d3ce0" },
+    "Event": { "label": "异常事件", "color": "#d21f4a" },
+    "WorkOrder": { "label": "工单", "color": "#c27803" },
+    "Part": { "label": "零件", "color": "#0d7a72" },
+    "Crew": { "label": "班组", "color": "#2563eb" }
+  },
+  "relKeywords": {
+    "hasEvent": ["发生", "事件", "温升", "告警", "异常"],
+    "hasWorkOrder": ["工单", "维修", "检查"],
+    "needsPart": ["零件", "轴承", "备件", "库存"],
+    "ownedBy": ["班组", "负责", "谁来"],
+    "consumes": ["消耗", "用哪颗"],
+    "risk": ["风险", "分数", "risk"],
+    "status": ["状态", "进度"]
+  },
+  "propMap": {
+    "risk": [["riskScore"], "风险分"],
+    "status": [["status"], "状态"],
+    "location": [["line"], "产线"]
+  },
+  "nodes": [
+    { "id": "EQ-4401", "type": "Equipment", "name": "立式加工中心 VMC-4401", "props": { "assetNo": "VMC-4401", "line": "机加一线", "spindleTemp": "78.4 °C", "threshold": "72 °C", "load": "86%", "status": "告警" } },
+    { "id": "EVT-9102", "type": "Event", "name": "主轴轴承温升超阈", "props": { "severity": "高", "riskScore": 0.86, "rule": "risk_score ≥ 0.82", "status": "待处置" } },
+    { "id": "WO-8821", "type": "WorkOrder", "name": "主轴轴承检查 / 更换", "props": { "priority": "P1", "window": "今晚 01:30", "downtime": "90 分钟", "status": "草稿" } },
+    { "id": "SP-17", "type": "Part", "name": "主轴角接触轴承 7014C", "props": { "sku": "7014C-SP17", "stock": 1, "safety": 2, "status": "库位紧张" } },
+    { "id": "CREW-NIGHT", "type": "Crew", "name": "夜班维修组", "props": { "onDuty": 5, "bearingCert": 3, "status": "在岗" } }
+  ],
+  "edges": [
+    { "source": "EQ-4401", "target": "EVT-9102", "rel": "hasEvent", "label": "发生" },
+    { "source": "EQ-4401", "target": "WO-8821", "rel": "hasWorkOrder", "label": "关联工单" },
+    { "source": "EQ-4401", "target": "SP-17", "rel": "needsPart", "label": "需要零件" },
+    { "source": "EQ-4401", "target": "CREW-NIGHT", "rel": "ownedBy", "label": "由班组负责" },
+    { "source": "WO-8821", "target": "SP-17", "rel": "consumes", "label": "消耗零件" },
+    { "source": "EVT-9102", "target": "SP-17", "rel": "needsPart", "label": "建议零件" }
+  ]
+}
