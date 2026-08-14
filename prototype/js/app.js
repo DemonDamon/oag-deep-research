@@ -8,6 +8,7 @@
     objectId: params.get("oid") || "",
     actionId: "",
     proposals: {},
+    simulations: {},
     lastAnswer: null,
     toast: null,
     search: "",
@@ -73,6 +74,47 @@
     return (state.proposals[state.sceneId] || []).filter((p) => p.status === "pending").length;
   }
 
+  function simulationKey(actionId) {
+    return state.sceneId + ":" + actionId + ":" + (state.objectId || "none");
+  }
+
+  function actionMeta(a) {
+    return {
+      risk: a.risk || "中",
+      approver: a.approver || "业务主管 + 数据责任人",
+      rollback: a.rollback || "保留原状态与幂等键，可由业务系统撤销",
+      prechecks: a.prechecks || ["目标对象状态仍然有效", "调用者具备对象可见权", "写回接口通过权限与幂等校验"],
+      baseline: a.baseline || "保持当前状态，风险继续累积",
+      outcome: a.outcome || "执行受控写回，降低当前业务风险",
+      tradeoff: a.tradeoff || "需要审批并可能影响关联对象",
+    };
+  }
+
+  function decisionLoop(active) {
+    const steps = [
+      ["事件", "任务进入工作台"],
+      ["对象", "装配关系与证据"],
+      ["推演", "比较候选方案"],
+      ["审批", "校验权限与条件"],
+      ["执行 / 记忆", "写回并记录结果"],
+    ];
+    return `<div class="decision-loop">${steps
+      .map(([name, note], i) => `<div class="loop-step ${i < active ? "done" : i === active ? "current" : "locked"}">
+        <span class="loop-index">${i + 1}</span><span><b>${name}</b><small>${note}</small></span>
+      </div>`)
+      .join("")}</div>`;
+  }
+
+  function toolTrace(ans) {
+    const objectCount = new Set((ans.evidence || []).flatMap((e) => [e.from, e.to])).size;
+    return `<div class="tool-trace">
+      <div class="tool-step done"><span>1</span><div><b>查询对象</b><small>${objectCount || ans.seeds.length} 个对象 · ${(ans.evidence || []).length} 条关系</small></div></div>
+      <div class="tool-step done"><span>2</span><div><b>图关系计算</b><small>实体识别 + 两跳遍历</small></div></div>
+      <div class="tool-step done"><span>3</span><div><b>组织证据</b><small>仅使用可回链对象与关系</small></div></div>
+      <div class="tool-step gated"><span>4</span><div><b>申请 Action</b><small>未执行 · 需要模拟与审批</small></div></div>
+    </div>`;
+  }
+
   function topbar() {
     const u = ux().user || { name: "用户", role: "" };
     return `<header class="topbar">
@@ -124,27 +166,30 @@
     const sc = scene();
     const n = (sc.nodes || []).length;
     const e = (sc.edges || []).length;
-    return `<div class="crumb"><div><h1>${$esc(sc.name)}</h1><p>${$esc(sc.desc)} · 对象、关系、权限与写回在同一条回路上。</p></div>
-      <button class="btn primary" data-act="view" data-v="inbox">进入收件箱</button></div>
-      <div class="row cols-3" style="margin-bottom:14px">
-        <div class="card kpi"><div class="k">对象 / 关系</div><div class="v">${n} / ${e}</div><div class="s">当前场景本体规模</div></div>
-        <div class="card kpi"><div class="k">待审批 Action</div><div class="v">${pendingCount()}</div><div class="s">写回前必须过这一关</div></div>
-        <div class="card kpi"><div class="k">检索引擎</div><div class="v" style="font-size:18px">图多跳</div><div class="s">实体识别 + 两跳遍历，无后端</div></div>
+    const task = (ux().tasks || [])[0];
+    const selected = task ? node(task.objectId) : node(state.objectId);
+    return `<div class="crumb"><div><span class="eyebrow">DECISION OPERATING LAYER</span><h1>${$esc(sc.name)}</h1><p>${$esc(sc.desc)} · 让员工从业务事件进入对象、推演与受控行动。</p></div>
+      <button class="btn primary" data-act="view" data-v="inbox">打开任务收件箱</button></div>
+      ${decisionLoop(pendingCount() ? 3 : 1)}
+      <div class="row cols-3 metric-row">
+        <div class="card kpi"><div class="k">业务对象 / 关系</div><div class="v">${n} / ${e}</div><div class="s">不是表和字段，而是可操作业务语义</div></div>
+        <div class="card kpi"><div class="k">待审批 Action</div><div class="v">${pendingCount()}</div><div class="s">读权限与写权限严格分离</div></div>
+        <div class="card kpi"><div class="k">当前执行模式</div><div class="v compact">提案优先</div><div class="s">先模拟，再审批，最后写回</div></div>
       </div>
-      <div class="card"><h2>当前回路</h2><div class="pad">
-        <ol style="margin:0;padding-left:18px;line-height:1.9;font-size:13.5px">
-          <li>场景对象进入本体（${n} 个）</li>
-          <li>任务进入收件箱，点开即对象</li>
-          <li>对象图可拖拽、点选、两边遍历</li>
-          <li>OAG 用图检索回答，证据可点回对象</li>
-          <li>Action Proposal → 审批 → 模拟写回 → 对象状态更新</li>
-        </ol>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn" data-act="view" data-v="graph">打开对象图</button>
-          <button class="btn" data-act="product" data-v="oag">用 OAG 提问</button>
-          <button class="btn" data-act="product" data-v="compare">看 RAG 对照</button>
-        </div>
-      </div></div>`;
+      <div class="row home-grid">
+        <div class="card focus-card"><div class="section-kicker">当前业务事件</div><div class="pad">
+          ${task ? `<div class="focus-head"><span class="chip ${task.severity === "高" ? "high" : task.severity === "中" ? "mid" : "low"}">${$esc(task.severity)}风险</span><span class="d">${$esc(task.age)}</span></div>
+          <h2 class="focus-title">${$esc(task.title)}</h2><p>${$esc(task.hint)}</p>
+          <div class="object-anchor"><span>锚定对象</span>${idBtn(task.objectId)}<b>${selected ? $esc(selected.name) : ""}</b></div>
+          <div class="focus-actions"><button class="btn" data-act="object" data-id="${$esc(task.objectId)}">检查对象上下文</button><button class="btn primary" data-act="action-for-object" data-id="${$esc(task.objectId)}">进入方案推演</button></div>` : `<div class="empty">当前没有待处理事件</div>`}
+        </div></div>
+        <div class="card capability-card"><div class="section-kicker">Agent 能力边界</div><div class="pad capability-list">
+          <div><span class="cap-icon read">读</span><b>查询对象</b><small>可追溯、可回链</small></div>
+          <div><span class="cap-icon calc">算</span><b>计算 / 调用模型</b><small>只读 Function</small></div>
+          <div><span class="cap-icon plan">案</span><b>生成行动提案</b><small>不直接写回</small></div>
+          <div><span class="cap-icon write">写</span><b>执行已批准 Action</b><small>权限、审批、幂等、审计</small></div>
+        </div></div>
+      </div>`;
   }
 
   function viewInbox() {
@@ -208,26 +253,34 @@
     const actions = ux().actions || [];
     const a = actions.find((x) => x.id === state.actionId) || actions[0];
     if (!a) return `<div class="empty">该场景未配置 Action</div>`;
-    return `<div class="crumb"><div><h1>发起 Action Proposal</h1><p>只能生成提案。写回要审批、幂等键。</p></div></div>
-      <div class="row cols-2">
-        <div class="card"><h2>命令</h2><div class="pad">
-          <div class="qchips">${actions
-            .map((x) => `<button class="${x.id === a.id ? "on" : ""}" data-act="action-type" data-id="${x.id}">${$esc(x.name)}</button>`)
-            .join("")}</div>
-          <div class="banner">写回目标：${$esc(a.writes)} · 需要审批：是</div>
-          <div class="form">${a.fields
-            .map((f) => `<div class="field"><label>${$esc(f.label)}</label><input value="${$esc(f.value)}"></div>`)
-            .join("")}
-            <div class="field"><label>幂等键</label><input class="mono" value="act-${a.id}-${state.sceneId}-20260814"></div>
-          </div>
-          <button class="btn primary" data-act="submit-proposal">提交提案（不直接写回）</button>
-        </div></div>
-        <div class="card"><h2>校验</h2><div class="pad"><table class="props">
-          <tr><th>打开应用</th><td>通过</td></tr>
-          <tr><th>看见对象</th><td>通过 · 当前场景可见域</td></tr>
-          <tr><th>调用 Function</th><td>通过 · 只读</td></tr>
-          <tr><th>执行 Action</th><td>拦截直写 · 进入审批</td></tr>
-        </table></div></div>
+    const o = node(state.objectId);
+    const links = o ? engine().linksOf(o.id).slice(0, 4) : [];
+    const meta = actionMeta(a);
+    const simulated = !!state.simulations[simulationKey(a.id)];
+    return `<div class="crumb"><div><span class="eyebrow">CONTROLLED ACTION</span><h1>方案推演与行动申请</h1><p>同一屏完成对象检查、参数推演、权限校验与审批申请；任何按钮都不会直接写回。</p></div></div>
+      ${decisionLoop(simulated ? 3 : 2)}
+      <div class="qchips action-tabs">${actions
+        .map((x) => `<button class="${x.id === a.id ? "on" : ""}" data-act="action-type" data-id="${x.id}">${$esc(x.name)}</button>`)
+        .join("")}</div>
+      <div class="action-workbench">
+        <section class="card context-panel"><div class="section-kicker">1 · 对象上下文</div><div class="pad">
+          ${o ? `<div class="selected-object"><span class="object-glyph"></span><div><b>${$esc(o.name)}</b><small>${$esc(typeLabel(o.type))} · ${$esc(o.id)}</small></div></div>
+          <table class="props compact-table">${Object.entries(o.props || {}).slice(0, 4).map(([k, v]) => `<tr><th>${$esc(k)}</th><td>${$esc(v)}</td></tr>`).join("")}</table>
+          <div class="relation-list">${links.map((l) => `<div><span>${$esc(l.rel)}</span>${idBtn(l.to)}</div>`).join("") || `<p class="empty">无关联对象</p>`}</div>` : `<div class="empty">请先选择对象</div>`}
+        </div></section>
+        <section class="card simulation-panel"><div class="section-kicker">2 · 情景推演</div><div class="pad">
+          <div class="form">${a.fields.map((f) => `<div class="field"><label>${$esc(f.label)}</label><input value="${$esc(f.value)}"></div>`).join("")}</div>
+          <div class="scenario-compare"><div><span>保持现状</span><b>${$esc(meta.baseline)}</b></div><div class="proposed"><span>采用方案</span><b>${$esc(meta.outcome)}</b></div></div>
+          <div class="tradeoff"><b>权衡</b><span>${$esc(meta.tradeoff)}</span></div>
+          <button class="btn ${simulated ? "ok" : "primary"}" data-act="simulate">${simulated ? "✓ 已完成本地模拟" : "运行本地模拟"}</button>
+        </div></section>
+        <section class="card boundary-panel"><div class="section-kicker">3 · 执行边界</div><div class="pad">
+          <div class="boundary-summary"><span class="chip ${meta.risk === "高" ? "high" : "mid"}">${$esc(meta.risk)}风险</span><b>${$esc(a.name)}</b><small>写回：${$esc(a.writes)}</small></div>
+          <ul class="check-list">${meta.prechecks.map((x) => `<li><span>✓</span>${$esc(x)}</li>`).join("")}</ul>
+          <dl class="boundary-dl"><div><dt>审批人</dt><dd>${$esc(meta.approver)}</dd></div><div><dt>回滚</dt><dd>${$esc(meta.rollback)}</dd></div><div><dt>幂等键</dt><dd class="mono">act-${a.id}-${state.sceneId}</dd></div></dl>
+          <button class="btn primary full" data-act="submit-proposal" ${simulated ? "" : "disabled"}>${simulated ? "提交 Action 提案" : "请先完成模拟"}</button>
+          <p class="boundary-note">提交后进入审批队列；批准前不会调用外部写入接口。</p>
+        </div></section>
       </div>`;
   }
 
@@ -267,11 +320,19 @@
     (sc.nodes || []).forEach((n) => {
       (groups[n.type] || (groups[n.type] = [])).push(n);
     });
-    return `<div class="crumb"><div><h1>对象类型</h1><p>${$esc(sc.name)} 的类型清单。</p></div></div>
-      <div class="row cols-3">${Object.keys(groups)
-        .map((t) => `<div class="card"><h2>${$esc(typeLabel(t))}</h2><div class="pad">${groups[t]
-          .map((n) => `<div style="margin-bottom:8px">${idBtn(n.id)} <span class="d">${$esc(n.name)}</span></div>`)
-          .join("")}</div></div>`)
+    const steps = ["数据源", "元数据", "属性", "关系", "Actions"];
+    return `<div class="crumb"><div><span class="eyebrow">ONTOLOGY DESIGN</span><h1>对象类型</h1><p>业务对象不是数据库表：它由来源、语义、属性、关系和受控行动共同定义。</p></div></div>
+      <div class="model-stepper">${steps.map((x, i) => `<div class="${i === 0 ? "current" : ""}"><span>${i + 1}</span><b>${x}</b></div>`).join("")}</div>
+      <div class="row cols-3 type-grid">${Object.keys(groups)
+        .map((t) => {
+          const items = groups[t];
+          const props = new Set(items.flatMap((n) => Object.keys(n.props || {}))).size;
+          const rels = (sc.edges || []).filter((e) => items.some((n) => n.id === e.source || n.id === e.target)).length;
+          return `<div class="card type-card"><div class="type-card-head"><span class="type-icon" style="--type-color:${$esc((sc.types[t] || {}).color || "#3d3ce0")}"></span><div><h2>${$esc(typeLabel(t))}</h2><small>${items.length} 个对象实例</small></div></div><div class="pad">
+            <div class="type-stats"><span><b>${props}</b>属性</span><span><b>${rels}</b>关系</span><span><b>${(ux().actions || []).length}</b>可用 Actions</span></div>
+            ${items.slice(0, 3).map((n) => `<div class="type-object">${idBtn(n.id)}<span>${$esc(n.name)}</span></div>`).join("")}
+          </div></div>`;
+        })
         .join("")}</div>`;
   }
 
@@ -285,10 +346,11 @@
       ${
         ans
           ? `<div class="engine">引擎：确定性图检索（实体识别 + 两跳） · 种子 ${ans.seeds.length ? ans.seeds.map($esc).join(", ") : "全图"} · 关系 ${ans.rels.join(", ") || "未指定"}</div>
+        ${toolTrace(ans)}
         <div class="card"><h2>回答</h2><div class="pad"><p style="line-height:1.7;margin:0 0 12px">${$esc(ans.answer)}</p>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">${ans.seeds.map(idBtn).join("")}</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">${(ux().actions || [])
-            .map((a) => `<button class="btn primary" data-act="from-oag" data-id="${a.id}">生成提案：${$esc(a.name)}</button>`)
+            .map((a) => `<button class="btn primary" data-act="from-oag" data-id="${a.id}">进入推演：${$esc(a.name)}</button>`)
             .join("")}
             <button class="btn" data-act="view" data-v="pack">打开证据链</button>
           </div></div></div>`
@@ -454,9 +516,15 @@
     } else if (act === "scene") go({ sceneId: t.dataset.id, view: state.product === "ontology" ? "home" : state.view });
     else if (act === "view") go({ view: t.dataset.v });
     else if (act === "object") go({ product: "ontology", view: "object", objectId: t.dataset.id });
+    else if (act === "action-for-object") go({ product: "ontology", view: "action", objectId: t.dataset.id });
     else if (act === "action-type") go({ view: "action", actionId: t.dataset.id, product: "ontology" });
-    else if (act === "submit-proposal") submitProposal(state.actionId || (ux().actions[0] || {}).id, (ux().user || {}).name);
-    else if (act === "from-oag") submitProposal(t.dataset.id, "OAG · " + ((ux().user || {}).name || ""));
+    else if (act === "simulate") {
+      const actionId = state.actionId || (ux().actions[0] || {}).id;
+      state.simulations[simulationKey(actionId)] = true;
+      toast("本地情景模拟已完成；尚未写回任何外部系统。");
+      render();
+    } else if (act === "submit-proposal") submitProposal(state.actionId || (ux().actions[0] || {}).id, (ux().user || {}).name);
+    else if (act === "from-oag") go({ product: "ontology", view: "action", actionId: t.dataset.id, objectId: (state.lastAnswer && state.lastAnswer.seeds[0]) || state.objectId });
     else if (act === "example") runAsk(t.dataset.q);
     else if (act === "ask") {
       const q = (document.getElementById("qinput") || {}).value;
