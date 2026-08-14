@@ -6,6 +6,7 @@
 # Research run artifacts
 output/
 artifacts/
+archscribe-tmp/
 *.sqlite
 *.db
 
