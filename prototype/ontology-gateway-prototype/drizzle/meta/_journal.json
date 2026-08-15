@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1786728794483,
+      "tag": "0000_fancy_the_call",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786729354882,
+      "tag": "0001_good_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786729464794,
+      "tag": "0002_wise_morbius",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+ALTER TABLE `actionProposals` ADD CONSTRAINT `action_idempotency_key_unique` UNIQUE(`idempotencyKey`);
