@@ -1,6 +1,26 @@
 # Orion 融合原型
 
-把 `prototype-cursor` 的操作闭环（提案 / 审批 / 四权 / RAG 对照）和 `prototype-near` 的多场景图检索叠在一起。纯静态，可直接上 Vercel。
+把 `prototype-cursor` 的操作闭环（提案 / 审批 / 四权 / RAG 对照）和 `prototype-near` 的多场景图检索叠在一起。根目录版本保持纯静态，可直接部署到 Vercel。
+
+## 企业级全栈原型
+
+[`ontology-gateway-prototype/`](./ontology-gateway-prototype/) 是进一步工程化的 ORION 企业本体与能力网关。它采用 React、Express、tRPC、Drizzle ORM 与 MySQL，提供十个工作区，并串联以下受控决策闭环：
+
+```text
+对象查询 → OAG 分析 → 决策模拟 → Action 提案 → 人工审批 → 审计回流
+```
+
+该版本保留 Query、Function、Proposal、Action、Event 原始能力术语，固定支持业务员工、主管、本体建设者、开发/治理人员四类角色，并将 AgenticX 与 Near 终端智能体限定为 MCP/API 网关调用方。完整边界与高可用演进路线见 [`ARCHITECTURE.md`](./ontology-gateway-prototype/ARCHITECTURE.md)。
+
+```bash
+cd ontology-gateway-prototype
+pnpm install
+pnpm check
+pnpm test
+pnpm dev
+```
+
+> **运行边界：** 数据库连接、OAuth 与运行时密钥由部署环境注入，禁止提交 `.env`。Action 必须先模拟、再形成 Proposal、经授权角色审批后才能进入执行阶段。
 
 ## 保留场景
 
