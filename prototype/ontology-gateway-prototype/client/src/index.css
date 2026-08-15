@@ -1,0 +1,103 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Manrope", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --color-background: oklch(0.16 0.025 190);
+  --color-foreground: oklch(0.96 0.01 190);
+  --color-card: oklch(0.21 0.03 188);
+  --color-card-foreground: oklch(0.96 0.01 190);
+  --color-popover: oklch(0.2 0.03 188);
+  --color-popover-foreground: oklch(0.96 0.01 190);
+  --color-primary: oklch(0.81 0.13 185);
+  --color-primary-foreground: oklch(0.15 0.03 190);
+  --color-secondary: oklch(0.28 0.035 188);
+  --color-secondary-foreground: oklch(0.95 0.01 190);
+  --color-muted: oklch(0.25 0.025 190);
+  --color-muted-foreground: oklch(0.68 0.025 190);
+  --color-accent: oklch(0.71 0.16 50);
+  --color-accent-foreground: oklch(0.16 0.025 190);
+  --color-destructive: oklch(0.65 0.2 25);
+  --color-border: oklch(0.42 0.025 190 / 0.35);
+  --color-input: oklch(0.32 0.03 190);
+  --color-ring: oklch(0.81 0.13 185);
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.375rem;
+}
+
+:root,
+.dark {
+  --background: oklch(0.16 0.025 190);
+  --foreground: oklch(0.96 0.01 190);
+  --card: oklch(0.21 0.03 188);
+  --card-foreground: oklch(0.96 0.01 190);
+  --popover: oklch(0.2 0.03 188);
+  --popover-foreground: oklch(0.96 0.01 190);
+  --primary: oklch(0.81 0.13 185);
+  --primary-foreground: oklch(0.15 0.03 190);
+  --secondary: oklch(0.28 0.035 188);
+  --secondary-foreground: oklch(0.95 0.01 190);
+  --muted: oklch(0.25 0.025 190);
+  --muted-foreground: oklch(0.68 0.025 190);
+  --accent: oklch(0.71 0.16 50);
+  --accent-foreground: oklch(0.16 0.025 190);
+  --destructive: oklch(0.65 0.2 25);
+  --border: oklch(0.42 0.025 190 / 0.35);
+  --input: oklch(0.32 0.03 190);
+  --ring: oklch(0.81 0.13 185);
+}
+
+@layer base {
+  * { @apply border-border outline-ring/50; }
+  html { color-scheme: dark; }
+  body { @apply bg-background text-foreground antialiased; min-width: 320px; }
+  button, a, select, input, textarea { transition: color 160ms cubic-bezier(.23,1,.32,1), background-color 160ms cubic-bezier(.23,1,.32,1), border-color 160ms cubic-bezier(.23,1,.32,1), opacity 160ms cubic-bezier(.23,1,.32,1), transform 160ms cubic-bezier(.23,1,.32,1); }
+  button:active { transform: scale(.97); }
+  :where(button, a, select, input, textarea):focus-visible {
+    outline: 2px solid oklch(0.81 0.13 185);
+    outline-offset: 3px;
+  }
+  ::selection { background: rgba(94,234,212,.22); color: white; }
+}
+
+.cinematic-shell {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(20, 111, 110, .22), transparent 34%),
+    radial-gradient(circle at 86% 8%, rgba(176, 78, 26, .18), transparent 30%),
+    radial-gradient(circle at 70% 75%, rgba(9, 82, 86, .16), transparent 38%),
+    linear-gradient(145deg, #061618 0%, #091d20 48%, #0c1819 100%);
+}
+
+.glass-panel {
+  border: 1px solid rgba(255,255,255,.07);
+  background: linear-gradient(145deg, rgba(16,48,50,.68), rgba(8,26,29,.78));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.025), 0 18px 70px rgba(0,0,0,.16);
+  backdrop-filter: blur(18px);
+}
+
+.signal-grid {
+  background-image: linear-gradient(rgba(94,234,212,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(94,234,212,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+.ambient-orb { position: fixed; pointer-events: none; z-index: 0; border-radius: 9999px; filter: blur(90px); opacity: .2; }
+.ambient-orb-teal { width: 30rem; height: 30rem; left: 5%; top: 14%; background: #1aa4a2; }
+.ambient-orb-orange { width: 26rem; height: 26rem; right: 4%; top: 3%; background: #c76227; opacity: .15; }
+
+.micro-grid {
+  background-image: linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.text-balance { text-wrap: balance; }
+.scrollbar-thin { scrollbar-width: thin; scrollbar-color: rgba(94,234,212,.25) transparent; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .pulse-soft { animation: pulse-soft 2.6s cubic-bezier(.23,1,.32,1) infinite; }
+  @keyframes pulse-soft { 0%,100% { opacity:.55; transform:scale(.96) } 50% { opacity:1; transform:scale(1) } }
+}
